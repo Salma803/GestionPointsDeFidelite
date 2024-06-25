@@ -1,0 +1,10 @@
+# Set text files to use LF line endings on checkout
+*.js        text eol=lf
+*.css       text eol=lf
+*.html      text eol=lf
+*.json      text eol=lf
+*.ts        text eol=lf
+
+# Explicitly declare files that should be treated as binary
+*.png       binary
+*.jpg       binary
