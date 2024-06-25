@@ -18,12 +18,5 @@ module.exports = (sequelize, DataTypes) => {
         }
     });
 
-    Magasin.associate = (models) => {
-        Magasin.hasMany(models.Achat, {
-            foreignKey: 'id_magasin',
-            onDelete: 'CASCADE' // Delete associated Achats when Magasin is deleted
-        });
-    };
-
     return Magasin;
 };

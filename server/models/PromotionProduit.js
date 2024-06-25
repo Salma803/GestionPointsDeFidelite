@@ -1,14 +1,14 @@
 module.exports = (sequelize, DataTypes) => {
-    const Detail= sequelize.define("Detail", {
-        quantite: {
-            type: DataTypes.STRING, 
-        },
-        point:{
-            type: DataTypes.INTEGER,
+    const PromotionProduit = sequelize.define("PromotionProduit", {
+        valeur: {
+            type: DataTypes.INTEGER, 
             allowNull: false,
         },
-        total:{
-            type: DataTypes.FLOAT,
+        date_fin:{
+            type: DataTypes.DATE, 
+        },
+        date_debut:{
+            type: DataTypes.DATE,
             allowNull: false,
         },
         createdAt: {
@@ -21,17 +21,15 @@ module.exports = (sequelize, DataTypes) => {
         }
     });
 
-    Detail.associate = (models) => {
-        Detail.belongsTo(models.Achat, {
-            foreignKey: 'id_achat',
-            onDelete: 'CASCADE'
-        });
-        Detail.belongsTo(models.Produit, {
+    
+    PromotionProduit.associate = (models) => {
+        PromotionProduit.belongsTo(models.Produit, {
             foreignKey: 'id_produit',
             onDelete: 'CASCADE'
         });
         
     };
 
-    return Detail;
+
+    return PromotionProduit;
 };

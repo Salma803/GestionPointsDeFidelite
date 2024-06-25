@@ -14,17 +14,5 @@ module.exports = (sequelize, DataTypes) => {
         }
     });
 
-    Rayon.associate = (models) => {
-        Rayon.belongsTo(models.Regle, {
-            foreignKey: 'id_regle',
-            onDelete: 'CASCADE'
-        });
-        Rayon.belongsTo(models.Promotion, {
-            foreignKey: 'id_promotion',
-            onDelete: 'CASCADE'
-        });
-    };
-        
-
     return Rayon;
 };

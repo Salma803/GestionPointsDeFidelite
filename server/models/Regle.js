@@ -1,3 +1,5 @@
+const Promotion = require("./PromotionRayon");
+
 module.exports = (sequelize, DataTypes) => {
     const Regle = sequelize.define("Regle", {
         multiplicite: {
@@ -21,14 +23,5 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: DataTypes.NOW,
         }
     });
-
-    Regle.associate = (models) => {
-            
-        Regle.hasMany(models.Rayon, {
-            foreignKey: 'id_regle',
-            onDelete: 'CASCADE'
-        });
-    };
-
     return Regle;
 };

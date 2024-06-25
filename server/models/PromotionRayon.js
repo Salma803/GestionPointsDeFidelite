@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const Promotion = sequelize.define("Promotion", {
+    const PromotionRayon = sequelize.define("PromotionRayon", {
         valeur: {
             type: DataTypes.INTEGER, 
             allowNull: false,
@@ -21,17 +21,15 @@ module.exports = (sequelize, DataTypes) => {
         }
     });
 
+    
+    PromotionRayon.associate = (models) => {
+        PromotionRayon.belongsTo(models.Rayon, {
+            foreignKey: 'id_rayon',
+            onDelete: 'CASCADE'
+        });
+        
+    };
 
-        Promotion.associate = (models) => {
-            
-            Promotion.hasMany(models.Produit, {
-                foreignKey: 'id_produit',
-                onDelete: 'CASCADE'
-            });
-            Promotion.hasMany(models.Rayon, {
-                foreignKey: 'id_rayon',
-                onDelete: 'CASCADE'
-            });
-        };
-    return Promotion;
+
+    return PromotionRayon;
 };

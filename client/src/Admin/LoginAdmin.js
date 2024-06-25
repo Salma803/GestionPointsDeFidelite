@@ -13,7 +13,7 @@ function LoginClients() {
     try {
       const data = { email, mot_de_passe };
       const response = await axios.post(
-        "http://localhost:3001/client/login",
+        "http://localhost:3001/admin/login",
         data
       );
       if (response.data.error) {

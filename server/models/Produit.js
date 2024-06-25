@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         description:{
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
         },
         ean1:{
             type: DataTypes.STRING,
@@ -13,9 +13,12 @@ module.exports = (sequelize, DataTypes) => {
         },
         ean2:{
             type: DataTypes.STRING,
+            allowNull: true,
+        },
+        prix:{
+            type:DataTypes.FLOAT,
             allowNull: false,
         },
-
         createdAt: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
@@ -31,14 +34,7 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: 'id_rayon',
             onDelete: 'CASCADE'
         });
-        Produit.belongsTo(models.Promotion, {
-            foreignKey: 'id_promotion',
-            onDelete: 'CASCADE'
-        });
-        Produit.hasMany(models.Detail, {
-            foreignKey: 'id_produit',
-            onDelete: 'CASCADE'
-        });
+        
     };
 
     return Produit;

@@ -27,11 +27,7 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'id_magasin',
                 onDelete: 'SET NULL',
             });
-    Achat.hasOne(models.Detail, {
-                foreignKey: 'id_achat',
-                onDelete: 'CASCADE'
-            });
-    };
+        };
 
     return Achat;
 };

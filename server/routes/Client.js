@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const { Client } = require('../models'); 
+const { validateToken } = require('../middlewares/AthMiddleware');
+
 
 router.post('/login', async (req, res) => {
     const { email, mot_de_passe } = req.body;
@@ -28,6 +30,11 @@ router.post('/login', async (req, res) => {
         console.error('Error logging in:', error);
         return res.status(500).json({ error: 'Unexpected error during login' });
     }
+});
+router.get('/me', validateToken, (req, res) => {
+    // req.user contains decoded token information
+    const userId = req.user.id;
+    res.json({ userId });
 });
 
 module.exports = router;

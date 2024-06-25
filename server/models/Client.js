@@ -30,24 +30,7 @@ module.exports = (sequelize, DataTypes) => {
         }
     });
 
-    Client.associate = (models) => {
-        Client.hasMany(models.Reclamation, {
-            foreignKey: 'id_client',
-            onDelete: 'CASCADE'
-        });
-        Client.hasMany(models.ChequeCadeau, {
-            foreignKey: 'id_client',
-            onDelete: 'CASCADE'
-        });
-        Client.hasOne(models.CarteFidelite, {
-            foreignKey: 'id_client',
-            onDelete: 'CASCADE'
-        });
-        Client.hasOne(models.Achat, {
-            foreignKey: 'id_client',
-            onDelete: 'CASCADE'
-        });
-    };
+    
 
     return Client;
 };
