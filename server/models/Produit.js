@@ -10,10 +10,12 @@ module.exports = (sequelize, DataTypes) => {
         ean1:{
             type: DataTypes.STRING,
             allowNull: false,
+            unique: true,
         },
         ean2:{
             type: DataTypes.STRING,
             allowNull: true,
+            unique: true,
         },
         prix:{
             type:DataTypes.FLOAT,
@@ -36,6 +38,5 @@ module.exports = (sequelize, DataTypes) => {
         });
         
     };
-
     return Produit;
 };

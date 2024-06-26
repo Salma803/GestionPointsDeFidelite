@@ -1,11 +1,12 @@
 module.exports = (sequelize, DataTypes) => {
     const Achat = sequelize.define("Achat", {
         point: {
-            type: DataTypes.INTEGER, 
+            type: DataTypes.INTEGER,
+            allowNull: false,
         },
         reste:{
             type: DataTypes.FLOAT,
-            allowNull: false,
+            
         },
         createdAt: {
             type: DataTypes.DATE,
@@ -21,12 +22,17 @@ module.exports = (sequelize, DataTypes) => {
         Achat.belongsTo(models.Client, {
             foreignKey: 'id_client',
             onDelete: 'CASCADE',
+            allowNull: false,
         });
     
     Achat.belongsTo(models.Magasin, {
-                foreignKey: 'id_magasin',
-                onDelete: 'SET NULL',
-            });
+        foreignKey: {
+            name: 'id_magasin',
+            defaultValue: 1, //Valeur par défaur à 0 pour indiquer les achats en ligne
+             // Assurez-vous que le champ ne peut pas être nul
+        },
+        onDelete: 'SET NULL',
+    });
         };
 
     return Achat;

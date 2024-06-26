@@ -27,16 +27,12 @@ function Panier() {
                 setIsLoggedIn(true); // Assuming successful fetch means user is logged in
 
                 // Fetch cart items once userId is fetched
-                const responsePanier = await axios.get(`http://localhost:3001/panier/${userId}`);
+                const responsePanier = await axios.get(`http://localhost:3001/panierenligne/${userId}`);
 
                 // Assuming the response.data contains an array of cart items
                 setProducts(responsePanier.data); // Update products state with cart items
 
-                // Calculate total amount
-                const totalPanier = responsePanier.data.reduce((acc, item) => {
-                    return acc + (item.quantité * item.Produit.prix);
-                }, 0);
-                setTotal(totalPanier);
+        
             } catch (error) {
                 console.error('Error fetching user data or cart items:', error);
                 // Handle error states (e.g., setProducts([]), show error message)
@@ -46,12 +42,22 @@ function Panier() {
         fetchCartItems();
     }, []);
 
+    // Function to calculate the total amount
+    const calculateTotal = (updatedProducts) => {
+        const totalPanier = updatedProducts.reduce((acc, item) => {
+            return acc + (item.quantité * item.Produit.prix);
+        }, 0);
+        setTotal(totalPanier);
+    };
+
     // Function to handle adding quantity
     const handleAddQuantity = async (id) => {
         try {
             const response = await axios.put(`http://localhost:3001/panier/ajouter/${id}`);
             // Update products state with updated quantity
-            setProducts(products.map(item => item.id === id ? { ...item, quantité: item.quantité + 1 } : item));
+            const updatedProducts = products.map(item => item.id === id ? { ...item, quantité: item.quantité + 1 } : item);
+            setProducts(updatedProducts);
+            calculateTotal(updatedProducts);
         } catch (error) {
             console.error('Error adding quantity:', error);
         }
@@ -62,7 +68,9 @@ function Panier() {
         try {
             const response = await axios.put(`http://localhost:3001/panier/soustraire/${id}`);
             // Update products state with updated quantity
-            setProducts(products.map(item => item.id === id ? { ...item, quantité: item.quantité - 1 } : item));
+            const updatedProducts = products.map(item => item.id === id ? { ...item, quantité: item.quantité - 1 } : item);
+            setProducts(updatedProducts);
+            calculateTotal(updatedProducts);
         } catch (error) {
             console.error('Error subtracting quantity:', error);
         }

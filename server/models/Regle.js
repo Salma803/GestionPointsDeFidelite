@@ -23,5 +23,15 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: DataTypes.NOW,
         }
     });
+
+
+    Regle.associate = (models) => {
+        Regle.belongsTo(models.Rayon, {
+            foreignKey: 'id_rayon',
+            onDelete: 'CASCADE'
+        });
+        
+    };
+
     return Regle;
 };

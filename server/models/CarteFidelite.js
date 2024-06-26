@@ -1,11 +1,13 @@
 module.exports = (sequelize, DataTypes) => {
     const CarteFidelite = sequelize.define("CarteFidelite", {
         point: {
-            type: DataTypes.INTEGER, 
+            type: DataTypes.INTEGER,
+            allowNull: false, 
         },
         reste:{
             type: DataTypes.FLOAT,
-            allowNull: false,
+            defaultValue:0,
+            
         },
         createdAt: {
             type: DataTypes.DATE,

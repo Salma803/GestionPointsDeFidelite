@@ -12,15 +12,17 @@ const db = require("./models");
 const clientRoutes = require("./routes/Client");
 const adminRoutes = require("./routes/Admin");
 const produitRoutes = require("./routes/Produits");
-const panierRoutes = require("./routes/Panier");
+const panierRoutes = require("./routes/PanierEnLigne");
 const rayonRoutes = require("./routes/Rayon");
+const promotionRoutes = require("./routes/Promotion");
 
 
 app.use("/client", clientRoutes);
 app.use("/admin", adminRoutes );
 app.use("/produit",produitRoutes);
-app.use("/panier",panierRoutes);
+app.use("/panierenligne",panierRoutes);
 app.use("/rayon",rayonRoutes);
+app.use("/promotion",promotionRoutes);
 
 
 db.sequelize.sync().then(() => {

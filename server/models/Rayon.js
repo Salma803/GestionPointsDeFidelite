@@ -1,9 +1,9 @@
 module.exports = (sequelize, DataTypes) => {
     const Rayon = sequelize.define("Rayon", {
         nom: {
-            type: DataTypes.STRING, 
+            type: DataTypes.STRING,
+            allowNull: false,
         },
-
         createdAt: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,

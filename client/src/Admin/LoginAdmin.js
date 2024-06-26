@@ -20,7 +20,7 @@ function LoginClients() {
         alert(response.data.error);
       } else {
         sessionStorage.setItem("accessToken", response.data.accessToken);
-        navigate("/client/home");
+        navigate("/admin/home");
       }
     } catch (error) {
       console.error(error);

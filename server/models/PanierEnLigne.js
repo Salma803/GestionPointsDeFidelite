@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const Panier = sequelize.define("Panier", {
+    const PanierEnLigne = sequelize.define("PanierEnLigne", {
         quantité: {
             type: DataTypes.INTEGER,
             allowNull: false,
@@ -17,16 +17,16 @@ module.exports = (sequelize, DataTypes) => {
         },
     });
 
-    Panier.associate = (models) => {
-        Panier.belongsTo(models.Client, {
+    PanierEnLigne.associate = (models) => {
+        PanierEnLigne.belongsTo(models.Client, {
             foreignKey: 'id_client',
             onDelete: 'CASCADE',
         });
-        Panier.belongsTo(models.Produit, {
+        PanierEnLigne.belongsTo(models.Produit, {
             foreignKey: 'id_produit',
             onDelete: 'CASCADE',
         });
     };
 
-    return Panier;
+    return PanierEnLigne;
 };

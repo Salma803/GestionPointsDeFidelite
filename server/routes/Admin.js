@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const { sequelize,Admin,Client} = require('../models'); 
 const { validateToken } = require('../middlewares/AthMiddleware');
 
-
+//Connexion de l'admin ou on compare juste le mot de passe non chiffré (un souci avec ce concept)
 router.post('/login', async (req, res) => {
     const { email, mot_de_passe } = req.body;
 
@@ -30,6 +30,8 @@ router.post('/login', async (req, res) => {
         return res.status(500).json({ error: 'Unexpected error during login' });
     }
 });
+
+//Creation d'un client a travers l'admin,on voit d'abord si il n'ya pas un client avec le meme email
 router.post('/creerclient',validateToken, async (req, res) => {
     const { nom, prenom, adresse, email, mot_de_passe } = req.body;
 

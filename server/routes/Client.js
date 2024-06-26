@@ -5,7 +5,7 @@ const router = express.Router();
 const { Client } = require('../models'); 
 const { validateToken } = require('../middlewares/AthMiddleware');
 
-
+//route de connexion du client
 router.post('/login', async (req, res) => {
     const { email, mot_de_passe } = req.body;
 
@@ -31,6 +31,8 @@ router.post('/login', async (req, res) => {
         return res.status(500).json({ error: 'Unexpected error during login' });
     }
 });
+
+//route pour trouver l'id du client connecté a ce moment à travers l'access token
 router.get('/me', validateToken, (req, res) => {
     // req.user contains decoded token information
     const userId = req.user.id;
