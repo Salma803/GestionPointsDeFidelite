@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { PanierEnLigne, Client, Produit,Achat,Detail } = require('../models');
-const { where } = require('sequelize');
+const { PanierEnLigne, Client, Produit,Achat,Detail,PromotionProduit,PromotionRayon } = require('../models');
+const { where,Op } = require('sequelize');
 
 router.post('/', async (req, res) => {
     const { quantité, id_client, id_produit } = req.body;
@@ -165,7 +165,6 @@ router.delete('/client/:clientId', async (req, res) => {
 });
 
 //Passer a l'achat du panier une fois le panier validé
-
 router.post('/achat/:clientId', async (req, res) => {
     const clientId = req.params.clientId;
 
@@ -190,14 +189,44 @@ router.post('/achat/:clientId', async (req, res) => {
             const produit = item.Produit;
 
             // Vérifier si le produit est soldé
-            const { data: { estSolde, valeurSolde } } = await axios.get(`/prixsolde/${produit.id}`);
-            
+            const promotionProduit = await PromotionProduit.findOne({
+                where: {
+                    id_produit: produit.id,
+                    valeur: {
+                        [Op.ne]: 0
+                    }
+                }
+            });
+
+            const promotionRayon = await PromotionRayon.findOne({
+                where: {
+                    id_rayon: produit.id_rayon,
+                    valeur: {
+                        [Op.ne]: 0
+                    }
+                }
+            });
+
+            let estSolde = false;
+            let valeurSolde = 0;
+
+            if (promotionProduit || promotionRayon) {
+                estSolde = true;
+                if (promotionRayon && promotionProduit) {
+                    valeurSolde = Math.max(promotionRayon.valeur, promotionProduit.valeur);
+                } else if (promotionRayon) {
+                    valeurSolde = promotionRayon.valeur;
+                } else if (promotionProduit) {
+                    valeurSolde = promotionProduit.valeur;
+                }
+            }
+
             let prixApresSolde;
             if (estSolde) {
                 prixApresSolde = produit.prix - (produit.prix * (valeurSolde / 100));
             } else {
                 prixApresSolde = produit.prix;
-                totalPoints += Math.floor(produit.prix * item.quantité); // Ajouter des points seulement pour les produits non soldés
+                totalPoints += Math.floor(produit.prix * item.quantité);
             }
 
             totalSum += prixApresSolde * item.quantité;
@@ -211,7 +240,8 @@ router.post('/achat/:clientId', async (req, res) => {
         const nouvelAchat = await Achat.create({
             id_client: clientId,
             point: point,
-            reste: reste
+            reste: reste,
+            id_magasin:1
         });
 
         // Ajouter des lignes correspondantes dans la table Detail
@@ -220,10 +250,12 @@ router.post('/achat/:clientId', async (req, res) => {
                 id_achat: nouvelAchat.id,
                 id_produit: item.id_produit,
                 quantite: item.quantité,
-                point: point, // Assigner point calculé
-                total: item.quantité * item.Produit.prix // Calculer le total
+                point: point,
+                total: item.quantité * item.Produit.prix
             });
         }
+
+        // Vider le panier du client
         await PanierEnLigne.destroy({
             where: {
                 id_client: clientId,
@@ -236,7 +268,6 @@ router.post('/achat/:clientId', async (req, res) => {
         res.status(500).json({ error: 'Erreur lors de l\'ajout de l\'achat et des détails' });
     }
 });
-
 
 
 

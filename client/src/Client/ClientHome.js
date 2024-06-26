@@ -57,7 +57,7 @@ function ClientHome() {
             id_produit: productId
         };
 
-        axios.post('http://localhost:3001/panier', cartItem, {
+        axios.post('http://localhost:3001/panierenligne', cartItem, {
             headers: {
                 accessToken: sessionStorage.getItem("accessToken")
             }

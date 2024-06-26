@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: {
             name: 'id_magasin',
             defaultValue: 1, //Valeur par défaur à 0 pour indiquer les achats en ligne
-             // Assurez-vous que le champ ne peut pas être nul
+             
         },
         onDelete: 'SET NULL',
     });

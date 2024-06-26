@@ -5,12 +5,11 @@ import './Panier.css';
 function Panier() {
     const [products, setProducts] = useState([]);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [total, setTotal] = useState(0); // State to hold the total amount
+    const [total, setTotal] = useState(0);
 
     useEffect(() => {
         const fetchCartItems = async () => {
             try {
-                // Fetch user data to get userId
                 const response = await fetch('http://localhost:3001/client/me', {
                     headers: {
                         accessToken: sessionStorage.getItem("accessToken")
@@ -24,37 +23,30 @@ function Panier() {
                 const userData = await response.json();
                 const userId = userData.userId;
 
-                setIsLoggedIn(true); // Assuming successful fetch means user is logged in
+                setIsLoggedIn(true);
 
-                // Fetch cart items once userId is fetched
                 const responsePanier = await axios.get(`http://localhost:3001/panierenligne/${userId}`);
+                setProducts(responsePanier.data);
 
-                // Assuming the response.data contains an array of cart items
-                setProducts(responsePanier.data); // Update products state with cart items
-
-        
+                calculateTotal(responsePanier.data);
             } catch (error) {
                 console.error('Error fetching user data or cart items:', error);
-                // Handle error states (e.g., setProducts([]), show error message)
             }
         };
 
         fetchCartItems();
     }, []);
 
-    // Function to calculate the total amount
-    const calculateTotal = (updatedProducts) => {
-        const totalPanier = updatedProducts.reduce((acc, item) => {
+    const calculateTotal = (cartItems) => {
+        const totalPanier = cartItems.reduce((acc, item) => {
             return acc + (item.quantité * item.Produit.prix);
         }, 0);
         setTotal(totalPanier);
     };
 
-    // Function to handle adding quantity
     const handleAddQuantity = async (id) => {
         try {
-            const response = await axios.put(`http://localhost:3001/panier/ajouter/${id}`);
-            // Update products state with updated quantity
+            await axios.put(`http://localhost:3001/panierenligne/ajouter/${id}`);
             const updatedProducts = products.map(item => item.id === id ? { ...item, quantité: item.quantité + 1 } : item);
             setProducts(updatedProducts);
             calculateTotal(updatedProducts);
@@ -63,11 +55,9 @@ function Panier() {
         }
     };
 
-    // Function to handle subtracting quantity
     const handleSubtractQuantity = async (id) => {
         try {
-            const response = await axios.put(`http://localhost:3001/panier/soustraire/${id}`);
-            // Update products state with updated quantity
+            await axios.put(`http://localhost:3001/panierenligne/soustraire/${id}`);
             const updatedProducts = products.map(item => item.id === id ? { ...item, quantité: item.quantité - 1 } : item);
             setProducts(updatedProducts);
             calculateTotal(updatedProducts);
@@ -86,7 +76,6 @@ function Panier() {
                             <div className="product-details">
                                 <h3>{item.Produit.nom}</h3>
                                 <p>Prix unitaire: {item.Produit.prix} DH</p>
-        
                             </div>
                             <div className="quantity">
                                 <p className="quantity-text">Quantité: {item.quantité}</p>
@@ -94,7 +83,7 @@ function Panier() {
                                 <button className='subtractButton' onClick={() => handleSubtractQuantity(item.id)}>-</button>
                             </div>
                             <div className="product-details">
-                            <p>Total: {item.quantité * item.Produit.prix} DH</p>
+                                <p>Total: {item.quantité * item.Produit.prix} DH</p>
                             </div>
                         </div>
                     ))}
