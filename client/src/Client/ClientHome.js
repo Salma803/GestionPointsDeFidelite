@@ -72,17 +72,50 @@ function ClientHome() {
         });
     };
 
+    const updateLoyaltyCardAndNavigate = async () => {
+        if (!isLoggedIn) {
+            alert("Please log in to view your loyalty card");
+            navigate("/client"); // Redirect to login page
+            return;
+        }
+
+        try {
+            await axios.post(`http://localhost:3001/cartefidelite/${userId}`, {}, {
+                headers: {
+                    accessToken: sessionStorage.getItem("accessToken")
+                }
+            });
+
+            navigate("/cartefidelite");
+        } catch (error) {
+            console.error('Error updating loyalty card:', error);
+            alert('Error updating loyalty card');
+        }
+    };
+
     return (
         <div>
             <Link to={'/panier'}>Voir panier</Link>
+            <button onClick={updateLoyaltyCardAndNavigate}>Voir Carte de Fidélité</button>
             <h2>Liste des Produits</h2>
             <div className="product-list">
                 {products.map((product) => (
                     <div key={product.id} className="product">
                         <Link to={`/client/produit/${product.id}`} className="product-link">
                             <h3>{product.nom}</h3>
-                            <p>Description: {product.description}</p>
-                            <p>Prix: {product.prix} DH</p>
+                            <p>{product.description}</p>
+                            {!product.active && (
+                                <>
+                                    <p className='prix'>Prix: {product.prixAvantSolde} DH</p>
+                                </>
+                            )}
+                            {product.active && (
+                                <>
+                                    <p className='prixNSolde'>Prix: {product.prixAvantSolde} DH</p>
+                                    <p className='Solde'>{product.valeurSolde} %</p>
+                                    <p className='prixSolde'>Prix Apres Solde: {product.prixApresSolde} DH</p>
+                                </>
+                            )}
                         </Link>
                         <button onClick={() => addToCart(product.id)}>Ajouter au Panier</button>
                     </div>

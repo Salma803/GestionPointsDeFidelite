@@ -39,7 +39,7 @@ function Panier() {
 
     const calculateTotal = (cartItems) => {
         const totalPanier = cartItems.reduce((acc, item) => {
-            return acc + (item.quantité * item.Produit.prix);
+            return acc + (item.quantité * item.Produit.prixApresSolde);
         }, 0);
         setTotal(totalPanier);
     };
@@ -66,6 +66,63 @@ function Panier() {
         }
     };
 
+    const handleDeleteItem = async (id) => {
+        try {
+            await axios.delete(`http://localhost:3001/panierenligne/${id}`);
+            const updatedProducts = products.filter(item => item.id !== id);
+            setProducts(updatedProducts);
+            calculateTotal(updatedProducts);
+        } catch (error) {
+            console.error('Error deleting item:', error);
+        }
+    };
+
+    const handleClearCart = async () => {
+        try {
+            const response = await fetch('http://localhost:3001/client/me', {
+                headers: {
+                    accessToken: sessionStorage.getItem("accessToken")
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const userData = await response.json();
+            const userId = userData.userId;
+
+            await axios.delete(`http://localhost:3001/panierenligne/client/${userId}`);
+            setProducts([]);
+            setTotal(0);
+        } catch (error) {
+            console.error('Error clearing cart:', error);
+        }
+    };
+
+    const handlePurchaseCart = async () => {
+        try {
+            const response = await fetch('http://localhost:3001/client/me', {
+                headers: {
+                    accessToken: sessionStorage.getItem("accessToken")
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const userData = await response.json();
+            const userId = userData.userId;
+
+            await axios.post(`http://localhost:3001/panierenligne/achat/${userId}`);
+            setProducts([]);
+            setTotal(0);
+        } catch (error) {
+            console.error('Error purchasing cart:', error);
+        }
+    };
+
     return (
         <div>
             <h2>Panier</h2>
@@ -75,19 +132,22 @@ function Panier() {
                         <div key={item.id} className="cart-item">
                             <div className="product-details">
                                 <h3>{item.Produit.nom}</h3>
-                                <p>Prix unitaire: {item.Produit.prix} DH</p>
+                                <p>Prix unitaire: {item.Produit.prixApresSolde} DH</p>
                             </div>
                             <div className="quantity">
                                 <p className="quantity-text">Quantité: {item.quantité}</p>
                                 <button className='addButton' onClick={() => handleAddQuantity(item.id)}>+</button>
                                 <button className='subtractButton' onClick={() => handleSubtractQuantity(item.id)}>-</button>
+                                <button className='deleteButton' onClick={() => handleDeleteItem(item.id)}>Supprimer</button>
                             </div>
                             <div className="product-details">
-                                <p>Total: {item.quantité * item.Produit.prix} DH</p>
+                                <p>Total: {item.quantité * item.Produit.prixApresSolde} DH</p>
                             </div>
                         </div>
                     ))}
                     <p className='total'>Total du panier: {total} DH</p>
+                    <button className='clearCartButton' onClick={handleClearCart}>Supprimer le panier</button>
+                    <button className='purchaseCartButton' onClick={handlePurchaseCart}>Acheter</button>
                 </div>
             ) : (
                 <p>Your cart is empty.</p>

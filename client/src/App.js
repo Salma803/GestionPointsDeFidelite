@@ -9,6 +9,7 @@ import ClientHome from "./Client/ClientHome";
 import ProductDetails from "./Client/ProductDetails";
 import UserProfile from "./Client/UserProfile";
 import Panier from "./Client/Panier";
+import CarteFidelite from "./Client/CarteFidelite";
 
 function App() {
   useEffect(()=>{
@@ -27,6 +28,7 @@ function App() {
             <Route path="/client/produit/:id" element={<ProductDetails />} />
             <Route path="/user" element={<UserProfile />} />
             <Route path="/panier" element={<Panier />} />
+            <Route path="/cartefidelite" element={<CarteFidelite />} />
           </Routes>
         </Router>
     </div>

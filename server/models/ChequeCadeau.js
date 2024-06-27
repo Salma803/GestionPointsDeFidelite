@@ -1,9 +1,16 @@
+const { v4: uuidv4 } = require('uuid');
+
 module.exports = (sequelize, DataTypes) => {
     const ChequeCadeau = sequelize.define("ChequeCadeau", {
-        statut: {
-            type: DataTypes.STRING, 
+        code: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true,
         },
-        date_expiration:{
+        statut: {
+            type: DataTypes.STRING,
+        },
+        date_expiration: {
             type: DataTypes.DATE,
             allowNull: false,
         },
@@ -24,5 +31,12 @@ module.exports = (sequelize, DataTypes) => {
         });
     };
 
+    // Generate a unique code before creating a ChequeCadeau
+    ChequeCadeau.beforeCreate(async (cheque) => {
+        cheque.code = generateUniqueCode();
+    });
+
     return ChequeCadeau;
 };
+
+// Function to generate a unique code

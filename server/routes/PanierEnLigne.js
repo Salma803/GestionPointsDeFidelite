@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { PanierEnLigne, Client, Produit,Achat,Detail,PromotionProduit,PromotionRayon } = require('../models');
-const { where,Op } = require('sequelize');
+const {Op } = require('sequelize');
 
 router.post('/', async (req, res) => {
     const { quantité, id_client, id_produit } = req.body;
@@ -55,6 +55,7 @@ router.post('/', async (req, res) => {
 
 //Voir tous les elements du panier
 
+
 router.get('/:clientId', async (req, res) => {
     const clientId = req.params.clientId; // Extract clientId from request parameters
 
@@ -66,16 +67,80 @@ router.get('/:clientId', async (req, res) => {
             },
             include: [{
                 model: Produit,
-                attributes: ['nom', 'prix'] // Specify attributes to include from Produit
+                attributes: ['nom', 'prix', 'id', 'id_rayon'] // Include additional attributes required for promotions
             }]
         });
 
-        res.json(listePanier); // Send JSON response with cart items and associated product details
+        // Iterate through the cart items to calculate the discounted prices
+        const panierAvecPrixSolde = await Promise.all(listePanier.map(async (item) => {
+            const produit = item.Produit;
+
+            // Check if the product has an active promotion
+            const promotionProduit = await PromotionProduit.findOne({
+                where: {
+                    id_produit: produit.id,
+                    valeur: {
+                        [Op.ne]: 0 // Non-zero value indicates an active promotion
+                    },
+                    date_debut: {
+                        [Op.lte]: new Date() // Promotion start date is before or equal to today
+                    },
+                    date_fin: {
+                        [Op.gte]: new Date() // Promotion end date is after or equal to today
+                    }
+                }
+            });
+
+            const promotionRayon = await PromotionRayon.findOne({
+                where: {
+                    id_rayon: produit.id_rayon,
+                    valeur: {
+                        [Op.ne]: 0 // Non-zero value indicates an active promotion
+                    },
+                    date_debut: {
+                        [Op.lte]: new Date() // Promotion start date is before or equal to today
+                    },
+                    date_fin: {
+                        [Op.gte]: new Date() // Promotion end date is after or equal to today
+                    }
+                }
+            });
+
+            let estSolde = false;
+            let valeurSolde = 0;
+
+            if (promotionProduit || promotionRayon) {
+                estSolde = true;
+                if (promotionRayon && promotionProduit) {
+                    valeurSolde = Math.max(promotionRayon.valeur, promotionProduit.valeur);
+                } else if (promotionRayon) {
+                    valeurSolde = promotionRayon.valeur;
+                } else if (promotionProduit) {
+                    valeurSolde = promotionProduit.valeur;
+                }
+            }
+
+            let prixApresSolde = produit.prix;
+            if (estSolde) {
+                prixApresSolde = produit.prix - (produit.prix * (valeurSolde / 100));
+            }
+
+            // Attach the calculated discounted price to the product
+            produit.dataValues.prixApresSolde = prixApresSolde;
+
+            return item;
+        }));
+
+        res.json(panierAvecPrixSolde); // Send JSON response with cart items and associated product details including discounted prices
     } catch (error) {
         console.error('Error fetching cart items:', error);
         res.status(500).json('Failed to fetch cart items'); // Handle server error
     }
 });
+
+
+
+
 
 
 
@@ -164,95 +229,186 @@ router.delete('/client/:clientId', async (req, res) => {
     }
 });
 
-//Passer a l'achat du panier une fois le panier validé
 router.post('/achat/:clientId', async (req, res) => {
     const clientId = req.params.clientId;
 
     try {
+        console.log('Client ID:', clientId);
+
         // Vérifier si le client existe
         const client = await Client.findByPk(clientId);
         if (!client) {
             return res.status(404).json({ error: 'Client non trouvé' });
         }
+        console.log('Client trouvé:', client);
 
         // Récupérer tous les éléments du panier du client
         const panierItems = await PanierEnLigne.findAll({
             where: { id_client: clientId },
             include: [{ model: Produit }]
         });
+        console.log('Panier items:', panierItems);
+
+        if (panierItems.length === 0) {
+            return res.status(400).json({ error: 'Le panier est vide' });
+        }
 
         // Calculer la somme totale des quantités multipliées par le prix des produits
-        let totalSum = 0;
+        let totalSum1 = 0;
+        let totalSum2 = 0;
         let totalPoints = 0;
 
         for (const item of panierItems) {
             const produit = item.Produit;
 
             // Vérifier si le produit est soldé
+            let estSolde = false;
+            let valeurSolde = 0;
+
+            // Check for active promotions
             const promotionProduit = await PromotionProduit.findOne({
                 where: {
                     id_produit: produit.id,
                     valeur: {
-                        [Op.ne]: 0
+                        [Op.ne]: 0 // Non-zero value indicates an active promotion
+                    },
+                    date_debut: {
+                        [Op.lte]: new Date() // Promotion start date is before or equal to today
+                    },
+                    date_fin: {
+                        [Op.gte]: new Date() // Promotion end date is after or equal to today
                     }
                 }
             });
 
-            const promotionRayon = await PromotionRayon.findOne({
-                where: {
-                    id_rayon: produit.id_rayon,
-                    valeur: {
-                        [Op.ne]: 0
-                    }
-                }
-            });
-
-            let estSolde = false;
-            let valeurSolde = 0;
-
-            if (promotionProduit || promotionRayon) {
+            if (promotionProduit) {
                 estSolde = true;
-                if (promotionRayon && promotionProduit) {
-                    valeurSolde = Math.max(promotionRayon.valeur, promotionProduit.valeur);
-                } else if (promotionRayon) {
+                valeurSolde = promotionProduit.valeur;
+            } else {
+                // Check for rayon-level promotion if no product-level promotion found
+                const promotionRayon = await PromotionRayon.findOne({
+                    where: {
+                        id_rayon: produit.id_rayon,
+                        valeur: {
+                            [Op.ne]: 0 // Non-zero value indicates an active promotion
+                        },
+                        date_debut: {
+                            [Op.lte]: new Date() // Promotion start date is before or equal to today
+                        },
+                        date_fin: {
+                            [Op.gte]: new Date() // Promotion end date is after or equal to today
+                        }
+                    }
+                });
+
+                if (promotionRayon) {
+                    estSolde = true;
                     valeurSolde = promotionRayon.valeur;
-                } else if (promotionProduit) {
-                    valeurSolde = promotionProduit.valeur;
                 }
             }
 
+            // Calculate price after discount if product is soldé
             let prixApresSolde;
             if (estSolde) {
                 prixApresSolde = produit.prix - (produit.prix * (valeurSolde / 100));
             } else {
                 prixApresSolde = produit.prix;
                 totalPoints += Math.floor(produit.prix * item.quantité);
+                totalSum2 += prixApresSolde * item.quantité;
             }
 
-            totalSum += prixApresSolde * item.quantité;
+            totalSum1 += prixApresSolde * item.quantité;
         }
 
+        console.log('Total sum:', totalSum1);
+        console.log('Total points:', totalPoints);
+
         // Définir point et reste
-        const point = totalPoints;
-        const reste = totalSum - totalPoints;
+        let point = totalPoints;
+        let reste = totalSum2 - totalPoints;
+
+        // Adjust reste to be less than 1 and a decimal
+        while (reste >= 1) {
+            point += 1;
+            reste -= 1;
+        }
 
         // Créer une nouvelle ligne dans la table Achat
         const nouvelAchat = await Achat.create({
             id_client: clientId,
+            total: totalSum1,
             point: point,
             reste: reste,
-            id_magasin:1
+            id_magasin: 1 // Assuming store ID 1 for now
         });
+        console.log('Nouvel achat:', nouvelAchat);
 
         // Ajouter des lignes correspondantes dans la table Detail
         for (const item of panierItems) {
+            const produit = item.Produit;
+
+            // Vérifier si le produit est soldé (détails)
+            let estSolde = false;
+            let valeurSolde = 0;
+
+            const promotionProduit = await PromotionProduit.findOne({
+                where: {
+                    id_produit: produit.id,
+                    valeur: {
+                        [Op.ne]: 0
+                    },
+                    date_debut: {
+                        [Op.lte]: new Date()
+                    },
+                    date_fin: {
+                        [Op.gte]: new Date()
+                    }
+                }
+            });
+
+            if (promotionProduit) {
+                estSolde = true;
+                valeurSolde = promotionProduit.valeur;
+            } else {
+                const promotionRayon = await PromotionRayon.findOne({
+                    where: {
+                        id_rayon: produit.id_rayon,
+                        valeur: {
+                            [Op.ne]: 0
+                        },
+                        date_debut: {
+                            [Op.lte]: new Date()
+                        },
+                        date_fin: {
+                            [Op.gte]: new Date()
+                        }
+                    }
+                });
+
+                if (promotionRayon) {
+                    estSolde = true;
+                    valeurSolde = promotionRayon.valeur;
+                }
+            }
+
+            let pointDetail = 0;
+            let prixApresSolde;
+
+            if (estSolde) {
+                prixApresSolde = produit.prix - (produit.prix * (valeurSolde / 100));
+            } else {
+                prixApresSolde = produit.prix;
+                pointDetail = Math.floor(produit.prix * item.quantité);
+            }
+
             await Detail.create({
                 id_achat: nouvelAchat.id,
                 id_produit: item.id_produit,
                 quantite: item.quantité,
-                point: point,
-                total: item.quantité * item.Produit.prix
+                point: pointDetail,
+                total: prixApresSolde * item.quantité
             });
+            console.log('Detail ajouté pour produit:', item.id_produit);
         }
 
         // Vider le panier du client
@@ -261,14 +417,15 @@ router.post('/achat/:clientId', async (req, res) => {
                 id_client: clientId,
             },
         });
+        console.log('Panier vidé pour client:', clientId);
 
         res.status(201).json({ message: 'Achat et détails ajoutés avec succès' });
+
     } catch (error) {
         console.error('Erreur lors de l\'ajout de l\'achat et des détails:', error);
         res.status(500).json({ error: 'Erreur lors de l\'ajout de l\'achat et des détails' });
     }
 });
-
 
 
 module.exports = router;

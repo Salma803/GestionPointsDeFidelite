@@ -1,5 +1,9 @@
 module.exports = (sequelize, DataTypes) => {
     const Achat = sequelize.define("Achat", {
+        total:{
+            type: DataTypes.FLOAT,
+            allowNull: false,
+        },
         point: {
             type: DataTypes.INTEGER,
             allowNull: false,

@@ -15,6 +15,8 @@ const produitRoutes = require("./routes/Produits");
 const panierRoutes = require("./routes/PanierEnLigne");
 const rayonRoutes = require("./routes/Rayon");
 const promotionRoutes = require("./routes/Promotion");
+const carteFideliteRoutes = require("./routes/CarteFidelite");
+const chequeCadeauRoutes = require("./routes/ChequeCadeau");
 
 
 app.use("/client", clientRoutes);
@@ -23,6 +25,8 @@ app.use("/produit",produitRoutes);
 app.use("/panierenligne",panierRoutes);
 app.use("/rayon",rayonRoutes);
 app.use("/promotion",promotionRoutes);
+app.use("/cartefidelite",carteFideliteRoutes);
+app.use("/chequecadeau",chequeCadeauRoutes);
 
 
 db.sequelize.sync().then(() => {

@@ -39,7 +39,16 @@ function ProductDetails() {
                 <div className="produit"><strong>Nom du produit :</strong> {produit.nom}</div>
                 <div className="produit"><strong>Description du produit :</strong> {produit.description}</div>
                 <div className="produit"><strong>Code Produit :</strong> {produit.ean1}</div>
-                <div className="produit"><strong>Prix :</strong> {produit.prix}</div>
+                {produit.active ? (
+                    <>
+                        <div className="prixOriginal"><strong>Prix Original :</strong> {produit.prixAvantSolde} DH</div>
+                        <div className="promotion"><strong>Promotion :</strong> {produit.valeurSolde}%</div>
+                        <div className="prixSolde"><strong>Prix Actuel :</strong> {produit.prixApresSolde} DH</div>
+                        <div className="dateFin"><strong>Date de Fin de Promotion :</strong> {new Date(produit.dateFinPromo).toLocaleDateString()}</div>
+                    </>
+                ) : (
+                    <div className="prix"><strong>Prix :</strong> {produit.prix} DH</div>
+                )}
             </div>
         </div>
     );
