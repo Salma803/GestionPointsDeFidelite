@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+
 
 function CarteFidelite() {
     const [carteFidelite, setCarteFidelite] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [userId, setUserId] = useState(null); // Assuming you get userId from somewhere
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // Assuming you check login status somewhere
+    let navigate = useNavigate();
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -22,6 +26,7 @@ function CarteFidelite() {
 
                 const data = await response.json();
                 setUserId(data.userId);
+                setIsLoggedIn(true);
             } catch (error) {
                 setError('Failed to fetch user data');
                 console.error('Error fetching user data:', error);
@@ -50,6 +55,39 @@ function CarteFidelite() {
         fetchCarteFidelite();
     }, [userId]); // useEffect dependency on userId
 
+    const handleUpdate = async () => {
+        if (!isLoggedIn) {
+            alert("Please log in to view your loyalty card");
+            navigate("/client"); // Redirect to login page
+            return;
+        }
+
+        try {
+            const loyaltyResponse = await axios.post(`http://localhost:3001/chequecadeau/${userId}`, {}, {
+                headers: {
+                    accessToken: sessionStorage.getItem("accessToken")
+                }
+            });
+
+            if (loyaltyResponse.status === 201) {
+                alert('points insuffisants');
+                return;
+            }
+
+            await axios.post(`http://localhost:3001/chequecadeau/${userId}`, {}, {
+                headers: {
+                    accessToken: sessionStorage.getItem("accessToken")
+                }
+            });
+
+            alert('Loyalty card and gift cards updated successfully');
+            navigate('/chequecadeau');
+        } catch (error) {
+            console.error('Error updating loyalty card and gift cards:', error);
+            alert('Error updating loyalty card and gift cards');
+        }
+    };
+
     if (!userId) {
         return <div>Loading...</div>; // Assuming you want to show loading until userId is fetched
     }
@@ -65,10 +103,11 @@ function CarteFidelite() {
     return (
         <div className="carte-fidelite">
             {carteFidelite ? (
-                <div>
-                    <h2>Carte de Fidélité</h2>
-                    <p>Points: {carteFidelite.point}</p>
-                    <p>Reste: {carteFidelite.reste}</p>
+                <div className='Carte-Fidelite'>
+                    <h2 className='carteFidelité'>Carte de Fidélité</h2>
+                    <p className='points'>Points: {carteFidelite.point}</p>
+                    <p className='reste'>Reste: {carteFidelite.reste}</p>
+                    <button className='bouttonChequeCadeau' onClick={handleUpdate}>Convertir mes points en cheque cadeau</button>
                 </div>
             ) : (
                 <div>Aucune carte de fidélité trouvée pour ce client.</div>

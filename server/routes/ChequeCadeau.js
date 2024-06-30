@@ -53,7 +53,7 @@ router.post('/:idClient', async (req, res) => {
 
             return res.status(200).json({ message: 'Gift cards created and loyalty points updated successfully' });
         } else {
-            return res.status(200).json({ message: 'Insufficient points to create a gift card' });
+            return res.status(201).json({ message: 'Insufficient points to create a gift card' });
         }
     } catch (error) {
         console.error('Error processing the request:', error);
@@ -69,7 +69,7 @@ router.get('/:idClient', async (req, res) => {
         const giftCards = await ChequeCadeau.findAll({
             where: { id_client: idClient }
         });
-
+        
         if (giftCards.length === 0) {
             return res.status(404).json({ message: 'No gift cards found for this client' });
         }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
-import './ClientHome.css';
+
 
 function ClientHome() {
     const [products, setProducts] = useState([]);
@@ -92,37 +92,62 @@ function ClientHome() {
             alert('Error updating loyalty card');
         }
     };
+    const navigateChequeCadeau = async () => {
+        if (!isLoggedIn) {
+            alert("Please log in to view your gift cards");
+            navigate("/client"); // Redirect to login page
+            return;
+        }
+
+    
+            navigate("/chequecadeau");
+    };
+    const navigatePanier = async() => {
+        navigate('/panier');
+    };
+    const navigateAchat = async() => {
+        navigate('/achat');
+    }
 
     return (
         <div>
-            <Link to={'/panier'}>Voir panier</Link>
-            <button onClick={updateLoyaltyCardAndNavigate}>Voir Carte de Fidélité</button>
-            <h2>Liste des Produits</h2>
-            <div className="product-list">
-                {products.map((product) => (
-                    <div key={product.id} className="product">
-                        <Link to={`/client/produit/${product.id}`} className="product-link">
-                            <h3>{product.nom}</h3>
-                            <p>{product.description}</p>
-                            {!product.active && (
-                                <>
+            {/* Navbar */}
+            <nav className="custom-navbar">
+                <div className="navbar-brand">Your Logo Here</div>
+                <ul className="custom-navbar-nav">
+                    <li><button className="btn btn-primary" onClick={navigatePanier}>Voir panier</button></li>
+                    <li><button className="btn btn-primary" onClick={updateLoyaltyCardAndNavigate}>Voir Carte de Fidélité</button></li>
+                    <li><button className="btn btn-primary" onClick={navigateChequeCadeau}>Voir Vos chéque cadeau</button></li>
+                    <li><button className="btn btn-primary" onClick={navigateAchat}>Voir mon historique d'achat</button></li>
+                </ul>
+            </nav>
+
+            {/* Body */}
+            <div className="product-section">
+                <h2 className="section-title">Liste des Produits</h2>
+                <div className="product-list">
+                    {products.map((product) => (
+                        <div key={product.id} className="product-item">
+                            <Link to={`/client/produit/${product.id}`} className="product-link">
+                                <h3>{product.nom}</h3>
+                                <p>{product.description}</p>
+                                {!product.active && (
                                     <p className='prix'>Prix: {product.prixAvantSolde} DH</p>
-                                </>
-                            )}
-                            {product.active && (
-                                <>
-                                    <p className='prixNSolde'>Prix: {product.prixAvantSolde} DH</p>
-                                    <p className='Solde'>{product.valeurSolde} %</p>
-                                    <p className='prixSolde'>Prix Apres Solde: {product.prixApresSolde} DH</p>
-                                </>
-                            )}
-                        </Link>
-                        <button onClick={() => addToCart(product.id)}>Ajouter au Panier</button>
-                    </div>
-                ))}
+                                )}
+                                {product.active && (
+                                    <>
+                                        <p className='prixNSolde'>Prix: {product.prixAvantSolde} DH</p>
+                                        <p className='Solde'>{product.valeurSolde} %</p>
+                                        <p className='prixSolde'>Prix Après Solde: {product.prixApresSolde} DH</p>
+                                    </>
+                                )}
+                            </Link>
+                            <button className="btn btn-secondary" onClick={() => addToCart(product.id)}>+</button>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
 }
-
 export default ClientHome;

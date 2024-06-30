@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import './ProductDetails.css'
 
 function ProductDetails() {
     const { id } = useParams(); // Get the product ID from the URL

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import './Panier.css';
 
 function Panier() {
     const [products, setProducts] = useState([]);
@@ -115,7 +114,15 @@ function Panier() {
             const userData = await response.json();
             const userId = userData.userId;
 
+            // Purchase cart on backend
             await axios.post(`http://localhost:3001/panierenligne/achat/${userId}`);
+
+            // Update loyalty card after purchase
+            await updateLoyaltyCard();
+
+            // Update gift cards after purchase
+
+            // Clear products and total
             setProducts([]);
             setTotal(0);
         } catch (error) {
@@ -123,37 +130,62 @@ function Panier() {
         }
     };
 
+    const updateLoyaltyCard = async () => {
+        try {
+            const response = await fetch('http://localhost:3001/client/me', {
+                headers: {
+                    accessToken: sessionStorage.getItem("accessToken")
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const userData = await response.json();
+            const userId = userData.userId;
+
+            // Update loyalty card on backend
+            await axios.post(`http://localhost:3001/cartefidelite/${userId}`);
+        } catch (error) {
+            console.error('Error updating loyalty card:', error);
+        }
+    };
+
+    
+
     return (
-        <div>
-            <h2>Panier</h2>
+        <div className="cart-container">
+            <h2 className="cart-header">Panier</h2>
             {products.length > 0 ? (
                 <div className="cart-items">
                     {products.map((item) => (
                         <div key={item.id} className="cart-item">
                             <div className="product-details">
-                                <h3>{item.Produit.nom}</h3>
-                                <p>Prix unitaire: {item.Produit.prixApresSolde} DH</p>
+                                <h3 className="product-name">{item.Produit.nom}</h3>
+                                <p className="product-price">Prix unitaire: {item.Produit.prixApresSolde} DH</p>
                             </div>
                             <div className="quantity">
                                 <p className="quantity-text">Quantité: {item.quantité}</p>
-                                <button className='addButton' onClick={() => handleAddQuantity(item.id)}>+</button>
-                                <button className='subtractButton' onClick={() => handleSubtractQuantity(item.id)}>-</button>
-                                <button className='deleteButton' onClick={() => handleDeleteItem(item.id)}>Supprimer</button>
+                                <button className="add-button" onClick={() => handleAddQuantity(item.id)}>+</button>
+                                <button className="subtract-button" onClick={() => handleSubtractQuantity(item.id)}>-</button>
+                                <button className="delete-button" onClick={() => handleDeleteItem(item.id)}>Supprimer</button>
                             </div>
-                            <div className="product-details">
-                                <p>Total: {item.quantité * item.Produit.prixApresSolde} DH</p>
+                            <div className="product-total">
+                                <p className="total-price">Total: {item.quantité * item.Produit.prixApresSolde} DH</p>
                             </div>
                         </div>
                     ))}
-                    <p className='total'>Total du panier: {total} DH</p>
-                    <button className='clearCartButton' onClick={handleClearCart}>Supprimer le panier</button>
-                    <button className='purchaseCartButton' onClick={handlePurchaseCart}>Acheter</button>
+                    <p className="cart-total">Total du panier: {total} DH</p>
+                    <button className="clear-cart-button" onClick={handleClearCart}>Supprimer le panier</button>
+                    <button className="purchase-cart-button" onClick={handlePurchaseCart}>Acheter</button>
                 </div>
             ) : (
-                <p>Your cart is empty.</p>
+                <p className="empty-cart-message">Votre panier est vide.</p>
             )}
         </div>
     );
+    
 }
 
 export default Panier;
