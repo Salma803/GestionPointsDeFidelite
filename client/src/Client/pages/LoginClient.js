@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-
+import { Form, Button, Alert } from "react-bootstrap";
+import '../css/Login.css'
 
 function LoginClients() {
   const [email, setEmail] = useState("");
   const [mot_de_passe, setMotDePasse] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
@@ -17,41 +19,52 @@ function LoginClients() {
         data
       );
       if (response.data.error) {
-        alert(response.data.error);
+        setError(response.data.error);
       } else {
         sessionStorage.setItem("accessToken", response.data.accessToken);
         navigate("/client/home");
       }
     } catch (error) {
       console.error(error);
-      alert("Login failed");
+      setError("Login failed");
     }
   };
+
   return (
     <div className="LoginClient">
       <div className="form-container">
-        <form onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit}>
           <h2>Se connecter</h2>
-          <div>
-            <label>Email:</label>
-            <input
-              type="text"
+          {error && <Alert variant="danger">{error}</Alert>}
+          <Form.Group className="mb-3" controlId="formBasicEmail">
+            <Form.Label>Email address</Form.Label>
+            <Form.Control
+              type="email"
+              placeholder="Enter email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-          </div>
-          <div>
-            <label>Mot de passe:</label>
-            <input
-              type="mot_de_passe"
+            <Form.Text className="text-muted">
+              We'll never share your email with anyone else.
+            </Form.Text>
+          </Form.Group>
+
+          <Form.Group className="mb-3" controlId="formBasicPassword">
+            <Form.Label>Password</Form.Label>
+            <Form.Control
+              type="password"
+              placeholder="Password"
               value={mot_de_passe}
               onChange={(e) => setMotDePasse(e.target.value)}
               required
             />
-          </div>
-          <button type="submit">Je me connecte</button>
-        </form>
+          </Form.Group>
+
+          <Button variant="primary" type="submit">
+            Submit
+          </Button>
+        </Form>
       </div>
     </div>
   );

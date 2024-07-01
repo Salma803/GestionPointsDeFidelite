@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import { Alert, Card, Col, Row } from 'react-bootstrap';
+import '../css/ChequeCadeau.css';
 
 function ChequeCadeau() {
     const [chequesCadeaux, setChequesCadeaux] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [userId, setUserId] = useState(null); // Assuming you get userId from somewhere
+    const [userId, setUserId] = useState(null);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -38,50 +39,57 @@ function ChequeCadeau() {
                         }
                     });
                     setChequesCadeaux(response.data);
-                    setLoading(false); // Set loading to false after successful fetch
+                    setLoading(false);
                 } catch (error) {
                     setError('Vous n\'avez pas encore de chéque cadeaux');
                     console.error('Error fetching gift cards data:', error);
-                    setLoading(false); // Set loading to false on error
+                    setLoading(false);
                 }
             }
         };
 
         fetchUserData();
         fetchChequesCadeaux();
-    }, [userId]); // useEffect dependency on userId
+    }, [userId]);
 
     if (!userId) {
         return <div>Loading...</div>;
     }
 
     if (loading) {
-        return <div>Loading...</div>; 
+        return <div>Loading...</div>;
     }
 
     if (error) {
-        return <div>{error}</div>; 
+        return <Alert variant="danger">{error}</Alert>;
     }
 
     return (
         <div className="cheques-cadeaux">
             <h2 className="cheques-cadeaux-header">Chèques Cadeaux</h2>
-            {chequesCadeaux.length > 0 ? (
-                <ul className="cheques-cadeaux-list">
-                    {chequesCadeaux.map((cheque) => (
-                        <li key={cheque.id} className="cheque-item">
-                            <p className="cheque-code">Code: {cheque.code}</p>
-                            <p className="cheque-expiration">Date d'expiration: {new Date(cheque.date_expiration).toLocaleDateString()}</p>
-                            <p className="cheque-statut">Statut: {cheque.statut}</p>
-                        </li>
-                    ))}
-                </ul>
-            ) : (
-                <div className="no-cheques-message">Aucun chèque cadeau trouvé pour ce client.</div>
-            )}
+            <Row xs={1} md={2} lg={3} className="g-4">
+                {chequesCadeaux.length > 0 ? (
+                    chequesCadeaux.map((cheque) => (
+                        <Col key={cheque.id}>
+                            <Card>
+                                <Card.Body>
+                                    <Card.Title>{cheque.code}</Card.Title>
+                                    <Card.Subtitle className="mb-2 text-muted">
+                                        Date d'expiration: {new Date(cheque.date_expiration).toLocaleDateString()}
+                                    </Card.Subtitle>
+                                    <Card.Text>
+                                        Statut: {cheque.statut}
+                                    </Card.Text>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    ))
+                ) : (
+                    <Alert variant="info" className="no-cheques-message">Aucun chèque cadeau trouvé pour ce client.</Alert>
+                )}
+            </Row>
         </div>
     );
-    
 }
 
 export default ChequeCadeau;

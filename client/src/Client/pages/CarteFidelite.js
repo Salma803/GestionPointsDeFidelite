@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button, Spinner, Alert } from 'react-bootstrap'; // Import React Bootstrap components
 import axios from 'axios';
-
+import '../css/CarteFidelite.css';
 
 function CarteFidelite() {
     const [carteFidelite, setCarteFidelite] = useState(null);
@@ -89,15 +90,15 @@ function CarteFidelite() {
     };
 
     if (!userId) {
-        return <div>Loading...</div>; // Assuming you want to show loading until userId is fetched
+        return <Spinner animation="border" role="status"><span className="sr-only">Loading...</span></Spinner>; // Show loading spinner until userId is fetched
     }
 
     if (loading) {
-        return <div>Loading...</div>; // Show loading state while fetching loyalty card data
+        return <Spinner animation="border" role="status"><span className="sr-only">Loading...</span></Spinner>; // Show loading spinner while fetching loyalty card data
     }
 
     if (error) {
-        return <div>{error}</div>; // Show error message if fetching loyalty card data fails
+        return <Alert variant="danger">{error}</Alert>; // Show error message if fetching loyalty card data fails
     }
 
     return (
@@ -107,10 +108,10 @@ function CarteFidelite() {
                     <h2 className='carteFidelité'>Carte de Fidélité</h2>
                     <p className='points'>Points: {carteFidelite.point}</p>
                     <p className='reste'>Reste: {carteFidelite.reste}</p>
-                    <button className='bouttonChequeCadeau' onClick={handleUpdate}>Convertir mes points en cheque cadeau</button>
+                    <Button className='bouttonChequeCadeau' onClick={handleUpdate}>Convertir mes points en chèque cadeau</Button>
                 </div>
             ) : (
-                <div>Aucune carte de fidélité trouvée pour ce client.</div>
+                <Alert variant="info">Aucune carte de fidélité trouvée pour ce client.</Alert>
             )}
         </div>
     );

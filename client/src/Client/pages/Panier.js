@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Container, Row, Col, Card, Button, Alert } from 'react-bootstrap';
+import '../css/Panier.css'
 
 function Panier() {
     const [products, setProducts] = useState([]);
@@ -152,40 +154,41 @@ function Panier() {
         }
     };
 
-    
-
     return (
-        <div className="cart-container">
+        <Container className="cart-container mt-5">
             <h2 className="cart-header">Panier</h2>
             {products.length > 0 ? (
                 <div className="cart-items">
-                    {products.map((item) => (
-                        <div key={item.id} className="cart-item">
-                            <div className="product-details">
-                                <h3 className="product-name">{item.Produit.nom}</h3>
-                                <p className="product-price">Prix unitaire: {item.Produit.prixApresSolde} DH</p>
-                            </div>
-                            <div className="quantity">
-                                <p className="quantity-text">Quantité: {item.quantité}</p>
-                                <button className="add-button" onClick={() => handleAddQuantity(item.id)}>+</button>
-                                <button className="subtract-button" onClick={() => handleSubtractQuantity(item.id)}>-</button>
-                                <button className="delete-button" onClick={() => handleDeleteItem(item.id)}>Supprimer</button>
-                            </div>
-                            <div className="product-total">
-                                <p className="total-price">Total: {item.quantité * item.Produit.prixApresSolde} DH</p>
-                            </div>
-                        </div>
-                    ))}
-                    <p className="cart-total">Total du panier: {total} DH</p>
-                    <button className="clear-cart-button" onClick={handleClearCart}>Supprimer le panier</button>
-                    <button className="purchase-cart-button" onClick={handlePurchaseCart}>Acheter</button>
+                    <Row>
+                        {products.map((item) => (
+                            <Col md={4} key={item.id} className="mb-4">
+                                <Card>
+                                    <Card.Body>
+                                        <Card.Title>{item.Produit.nom}</Card.Title>
+                                        <Card.Text>Prix unitaire: {item.Produit.prixApresSolde} DH</Card.Text>
+                                        <Card.Text>Quantité: {item.quantité}</Card.Text>
+                                        <Card.Text>Total: {item.quantité * item.Produit.prixApresSolde} DH</Card.Text>
+                                        <div className="d-flex justify-content-between">
+                                            <Button className='add-button' variant="primary" onClick={() => handleAddQuantity(item.id)}>+</Button>
+                                            <Button className='subtract-button' variant="primary" onClick={() => handleSubtractQuantity(item.id)}>-</Button>
+                                            <Button  className='delete-button' variant="danger" onClick={() => handleDeleteItem(item.id)}>Supprimer</Button>
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        ))}
+                    </Row>
+                    <Alert variant="info" className="mt-3">Total du panier: {total} DH</Alert>
+                    <div className="d-flex justify-content-between mt-3">
+                        <Button className='clear-cart-button' variant="danger" onClick={handleClearCart}>Supprimer le panier</Button>
+                        <Button className='purchase-cart-button' variant="success" onClick={handlePurchaseCart}>Acheter</Button>
+                    </div>
                 </div>
             ) : (
-                <p className="empty-cart-message">Votre panier est vide.</p>
+                <Alert variant="warning">Votre panier est vide.</Alert>
             )}
-        </div>
+        </Container>
     );
-    
 }
 
 export default Panier;

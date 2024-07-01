@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Detail,Achat } = require('../models');
+const { Detail,Achat,Produit } = require('../models');
 
 
 router.get('/:idClient', async (req, res) => {
@@ -41,6 +41,8 @@ router.get('/detail/:idAchat', async (req, res) => {
         if (details.length === 0) {
             return res.status(200).json('Pas de détails correspondants pour cet achat');
         }
+
+        
 
         const mappedDetails = details.map(detail => ({
             id: detail.id,

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import '../css/Achat.css';
+
 
 function Achat() {
     const [userId, setUserId] = useState(null);
@@ -78,7 +80,7 @@ function Achat() {
                                     <Card.Title>Date: {new Date(achat.date_achat).toLocaleString()}</Card.Title>
                                     <Card.Text>Points: {achat.point}</Card.Text>
                                     <Card.Text>Total: {achat.total_achat} DH</Card.Text>
-                                    <Button variant="primary" onClick={() => toggleDetails(achat.id)}>
+                                    <Button variant="primary" className='details-bttn' onClick={() => toggleDetails(achat.id)}>
                                         
                                         {showDetails[achat.id] ? 'Masquer Détails' : 'Voir Détails'}
                                     </Button>

@@ -1,0 +1,23 @@
+.backButton {
+    margin-bottom: 20px;
+}
+
+.ProduitDiv {
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.product-image {
+    width: 100%;
+    height: auto;
+}
+
+.ProduitDiv .card-title {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.ProduitDiv .card-text {
+    margin-bottom: 10px;
+}
