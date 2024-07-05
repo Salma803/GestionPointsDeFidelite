@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { ChequeCadeau, CarteFidelite } = require('../models');
+const {Op } = require('sequelize');
+const cron = require('node-cron')
+const { ChequeCadeau, CarteFidelite,Client} = require('../models');
 const { v4: uuidv4 } = require('uuid');
 
 // Function to generate a unique code for gift cards
@@ -81,4 +83,150 @@ router.get('/:idClient', async (req, res) => {
     }
 });
 
+
+router.get('/', async (req, res) => {
+    try {
+        const chequeCadeaux = await ChequeCadeau.findAll({
+            include: [{
+                model: Client,
+                attributes: ['nom', 'prenom', 'email', 'telephone']
+            }]
+        });
+
+        if (chequeCadeaux.length === 0) {
+            return res.status(404).json({ error: 'Aucune chéque cadeaux trouvé' });
+        }
+
+        res.status(200).json(chequeCadeaux);
+    } catch (error) {
+        console.error('Error fetching cheque cadeau:', error);
+        res.status(500).json({ error: 'Failed to fetch cheque cadeau' });
+    }
+
+});
+
+router.put('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { statut, date_expiration } = req.body;
+    // Validation des champs point et restessss
+
+    try {
+        const [updated] = await ChequeCadeau.update({ statut,date_expiration }, { where: { id } });
+
+        if (updated) {
+            const updatedCheque = await ChequeCadeau.findOne({ where: { id } });
+            return res.status(200).json(updatedCheque);
+        } else {
+            return res.status(404).json({ error: 'Cheque Cadeau not found' });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+router.delete('/:id',async (req, res) => {
+    const chequeId = req.params.id;
+
+    try {
+        // Find client by ID
+        const chequeCadeaux = await ChequeCadeau.findOne({ where: { id: chequeId } });
+
+        // Check if carteFidelite exists
+        if (!chequeCadeaux) {
+            return res.status(404).json({ error: 'chequeCadeau not found' });
+        }
+
+        // Delete the carteFidelite
+        await chequeCadeaux.destroy();
+
+        // Send success message
+        res.json({ message: 'chequeCadeau deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting chequeCadeau:', error);
+        res.status(500).json({ error: 'Failed to delete carteFidelite' });
+    }
+});
+router.get('/admin/count', async (req, res) => {
+    try {
+      const count = await ChequeCadeau.count();
+      res.json({ count });
+    } catch (error) {
+      console.error('Error counting gift cards:', error);
+      res.status(500).json({ error: 'Failed to count gift cards' });
+    }
+  });
+
+function calculatePercentage(part, total) {
+    return total > 0 ? ((part / total) * 100).toFixed(2) : 0;
+}
+
+  router.get('/admin/pourcentage', async (req, res) => {
+    try {
+        const totalCards = await ChequeCadeau.count();
+        const validCards = await ChequeCadeau.count({ where:{statut: 'Valide' }});
+        const expiredCards = await ChequeCadeau.count({ where:{statut: 'Expiré' } });
+        const consumedCards = await ChequeCadeau.count({ where:{statut: 'Consommé' } });
+
+        const validPercentage = calculatePercentage(validCards, totalCards);
+        const expiredPercentage = calculatePercentage(expiredCards, totalCards);
+        const consumedPercentage = calculatePercentage(consumedCards, totalCards);
+
+        res.json({
+            total: totalCards,
+            valid: {
+                count: validCards,
+                percentage: validPercentage
+            },
+            expired: {
+                count: expiredCards,
+                percentage: expiredPercentage
+            },
+            consumed: {
+                count: consumedCards,
+                percentage: consumedPercentage
+            }
+        });
+    } catch (error) {
+        console.error('Error counting gift cards:', error);
+        res.status(500).json({ error: 'Failed to count gift cards' });
+    }
+});
+
+cron.schedule('0 * * * *', async () => {
+    try {
+        const cheques = await ChequeCadeau.findAll();
+        for (const cheque of cheques) {
+            if (cheque.date_expiration < new Date() && cheque.statut !== 'Expiré') {
+                cheque.statut = 'Expiré';
+                await cheque.save();
+            }
+        }
+        console.log('Statuts des chèques cadeaux mis à jour.');
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour des statuts des chèques cadeaux:', error);
+    }
+});
+
+
+
 module.exports = router;
+cron.schedule('0 * * * *', async () => {
+    try {
+        const cheques = await ChequeCadeau.findAll({
+            where: {
+                statut: {
+                    [Op.ne]: 'Consommé' // Op.ne signifie "not equal", donc statut différent de 'Consommé'
+                }
+            }
+        });
+        for (const cheque of cheques) {
+            if (cheque.date_expiration < new Date() && cheque.statut !== 'Expiré') {
+                cheque.statut = 'Expiré';
+                await cheque.save();
+            }
+        }
+        console.log('Statuts des chèques cadeaux mis à jour.');
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour des statuts des chèques cadeaux:', error);
+    }
+});

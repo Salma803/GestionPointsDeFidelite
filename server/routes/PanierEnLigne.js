@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { PanierEnLigne, Client, Produit,Achat,Detail,PromotionProduit,PromotionRayon } = require('../models');
+const { PanierEnLigne,Regle, Client, Produit,Achat,Detail,PromotionProduit,PromotionRayon } = require('../models');
 const {Op } = require('sequelize');
 
 router.post('/', async (req, res) => {
@@ -309,14 +309,19 @@ router.post('/achat/:clientId', async (req, res) => {
 
             // Calculate price after discount if product is soldé
             let prixApresSolde;
+            const regle = await Regle.findOne({
+                where: { id_rayon: produit.id_rayon }
+            });
+            const multiplicite = regle ? regle.multiplicite : 1;
+
             if (estSolde) {
                 prixApresSolde = produit.prix - (produit.prix * (valeurSolde / 100));
             } else {
                 prixApresSolde = produit.prix;
-                totalPoints += Math.floor(produit.prix * item.quantité);
-                totalSum2 += prixApresSolde * item.quantité;
             }
 
+            totalPoints += Math.floor(produit.prix * item.quantité * multiplicite);
+            totalSum2 += prixApresSolde * item.quantité;
             totalSum1 += prixApresSolde * item.quantité;
         }
 
@@ -397,8 +402,12 @@ router.post('/achat/:clientId', async (req, res) => {
             if (estSolde) {
                 prixApresSolde = produit.prix - (produit.prix * (valeurSolde / 100));
             } else {
+                const regle = await Regle.findOne({
+                    where: { id_rayon: produit.id_rayon }
+                });
+                const multiplicite = regle ? regle.multiplicite : 1;
                 prixApresSolde = produit.prix;
-                pointDetail = Math.floor(produit.prix * item.quantité);
+                pointDetail = Math.floor(produit.prix * item.quantité * multiplicite);
             }
 
             await Detail.create({
@@ -426,6 +435,7 @@ router.post('/achat/:clientId', async (req, res) => {
         res.status(500).json({ error: 'Erreur lors de l\'ajout de l\'achat et des détails' });
     }
 });
+
 
 
 module.exports = router;

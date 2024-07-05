@@ -1,43 +1,51 @@
-.carte-fidelite {
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
-  height: 100vh !important; /* Adjust as needed */
+.carte-et-cheque-cadeau {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  justify-content: space-between;
+  padding: 50px;
 }
-
+.cheque-card{
+ display: grid;
+ grid-template-rows: auto auto auto ; 
+}
 .Carte-Fidelite {
-  text-align: center !important;
-  padding: 20px !important;
-  border: 1px solid #ccc !important;
-  border-radius: 8px !important;
-  width: 80% !important; /* Adjust card width as needed */
-  max-width: 400px !important; /* Adjust max-width as needed */
-  background-color: #f7f7f7 !important;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1) !important;
+  height: fit-content;
+  position: center !important;
+  width: 500px !important;
+  background-image: url(../../../public/card-bg.avif);
+  background-size: cover; 
+  background-position: center;
+margin-left: 400px;
+  padding: 20px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 20px; /* Add margin bottom for spacing between sections */
 }
 
-.carteFidelité {
-  color: #3c43af !important;
-  font-size: 1.5rem !important;
-  margin-bottom: 10px !important;
+.cheques-cadeaux {
+  width: 100%;
+  padding: 20px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 20px; /* Add margin bottom for spacing between sections */
 }
 
-.points, .reste {
-  font-size: 1.2rem !important;
-  margin-bottom: 8px !important;
+.cheques-cadeaux-header {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
 }
 
-.bouttonChequeCadeau {
-  background-color: #55577d !important;
-  color: #fff !important;
-  border: none !important;
-  padding: 10px 20px !important;
-  font-size: 1rem !important;
-  cursor: pointer !important;
-  border-radius: 5px !important;
-  transition: background-color 0.3s ease !important;
+.no-cheques-message {
+  margin-top: 10px;
 }
 
-.bouttonChequeCadeau:hover {
-  background-color: #2c3276 !important;
-}
+
+
+  .Carte-Fidelite,
+  .cheques-cadeaux {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+

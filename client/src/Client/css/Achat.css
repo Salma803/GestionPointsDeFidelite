@@ -1,6 +1,7 @@
 /* Styles for Achat component */
 .container {
     padding: 20px;
+    width: 100%;
 }
 
 h2 {
@@ -34,7 +35,7 @@ h2 {
     margin-bottom: 10px;
 }
 
-.details-bttn{
+.details-bttn {
     background-color: #3c43af !important;
     color: #fff;
     border: none;
@@ -47,18 +48,24 @@ h2 {
 
 .details-bttn:hover {
     background-color: #2c3276 !important; 
-  }
-  
+}
 
 .details-container {
     background-color: #f9f9f9;
     padding: 10px;
     margin-top: 10px;
     border-radius: 8px;
+    overflow-x: auto;
 }
 
 .detail-item {
     margin-bottom: 5px;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
 }
 
 @media (max-width: 768px) {

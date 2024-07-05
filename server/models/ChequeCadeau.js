@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         statut: {
             type: DataTypes.STRING,
+            defaultValue:'Valide',
         },
         date_expiration: {
             type: DataTypes.DATE,
@@ -35,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
     ChequeCadeau.beforeCreate(async (cheque) => {
         cheque.code = generateUniqueCode();
     });
-
+    
     return ChequeCadeau;
 };
 

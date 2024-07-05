@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { CarteFidelite, Achat, ChequeCadeau } = require('../models');
+const { CarteFidelite,Client, Achat, ChequeCadeau } = require('../models');
 const { Op } = require('sequelize');
 
 // Route to update loyalty points and rest
@@ -80,6 +80,93 @@ router.get('/touver/:clientId', async (req, res) => {
         console.error('Error fetching loyalty card:', error);
         res.status(500).json({ error: 'Failed to fetch loyalty card' });
     }
+
 });
+
+
+router.get('/', async (req, res) => {
+    try {
+        const cartesFidelite = await CarteFidelite.findAll({
+            include: [{
+                model: Client,
+                attributes: ['nom', 'prenom','email', 'telephone']
+            }]
+        });
+
+        if (!cartesFidelite || cartesFidelite.length === 0) {
+            return res.status(404).json({ error: 'Aucune carte de fidélité trouvée' });
+        }
+
+        res.status(200).json(cartesFidelite);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des cartes de fidélité:', error);
+        res.status(500).json({ error: 'Échec de la récupération des cartes de fidélité' });
+    }
+});
+
+
+// Update point and reste of a CarteFidelite
+
+
+router.put('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { point, reste } = req.body;
+
+    // Validation des champs point et restessss
+    if (  point < 0) {
+        return res.status(400).json({ error: 'Point must be a positive number' });
+    }
+    if (reste < 0 || reste > 1) {
+        return res.status(400).json({ error: 'Reste must be between 0 and 1' });
+    }
+
+    try {
+        const [updated] = await CarteFidelite.update({ point,reste }, { where: { id } });
+
+        if (updated) {
+            const updatedCarte = await CarteFidelite.findOne({ where: { id } });
+            return res.status(200).json(updatedCarte);
+        } else {
+            return res.status(404).json({ error: 'CarteFidelite not found' });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: error.message });
+    }
+});
+
+
+
+
+router.delete('/:id',async (req, res) => {
+    const carteId = req.params.id;
+
+    try {
+        // Find client by ID
+        const carteFidelite = await CarteFidelite.findOne({ where: { id: carteId } });
+
+        // Check if carteFidelite exists
+        if (!carteFidelite) {
+            return res.status(404).json({ error: 'carteFidelite not found' });
+        }
+
+        // Delete the carteFidelite
+        await carteFidelite.destroy();
+
+        // Send success message
+        res.json({ message: 'carteFidelite deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting carteFidelite:', error);
+        res.status(500).json({ error: 'Failed to delete carteFidelite' });
+    }
+});
+router.get('/count', async (req, res) => {
+    try {
+      const count = await CarteFidelite.count();
+      res.json({ count });
+    } catch (error) {
+      console.error('Error counting loyalty cards:', error);
+      res.status(500).json({ error: 'Failed to count loyalty cardss' });
+    }
+  });
 
 module.exports = router;

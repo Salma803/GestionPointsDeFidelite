@@ -52,6 +52,22 @@ router.post('/creerrayon', async (req, res) => {
     }
 });
 
+router.get('/', async (req, res) => {
+    try {
+        const listeRayons = await Rayon.findAll();
+
+        if (listeRayons.length === 0) { // Correction de 'lenght' en 'length'
+            return res.status(404).json({ error: 'Aucun Rayon trouvé dans la table Rayon' });
+        }
+
+        res.json(listeRayons);
+    } catch (error) {
+        console.error('Error fetching rayons:', error);
+        res.status(500).json({ error: 'Failed to fetch rayons' });
+    }
+});
+    
+
 
 
 module.exports = router;

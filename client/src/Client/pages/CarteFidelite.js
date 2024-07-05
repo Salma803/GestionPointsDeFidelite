@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Spinner, Alert } from 'react-bootstrap'; // Import React Bootstrap components
+import { Button, Spinner, Alert, Card, Col, Row } from 'react-bootstrap';
 import axios from 'axios';
 import '../css/CarteFidelite.css';
 
-function CarteFidelite() {
+function CarteFidelite_ChequeCadeau() {
+    const [chequesCadeaux, setChequesCadeaux] = useState([]);
     const [carteFidelite, setCarteFidelite] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [userId, setUserId] = useState(null); // Assuming you get userId from somewhere
-    const [isLoggedIn, setIsLoggedIn] = useState(false); // Assuming you check login status somewhere
+    const [userId, setUserId] = useState(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1); // Current page of gift cards
+    const [itemsPerPage] = useState(6); // Number of items per page
     let navigate = useNavigate();
 
     useEffect(() => {
@@ -43,23 +46,42 @@ function CarteFidelite() {
                         }
                     });
                     setCarteFidelite(response.data);
-                    setLoading(false); // Set loading to false after successful fetch
+                    setLoading(false);
                 } catch (error) {
                     setError('Failed to fetch loyalty card data');
                     console.error('Error fetching loyalty card data:', error);
-                    setLoading(false); // Set loading to false on error
+                    setLoading(false);
+                }
+            }
+        };
+
+        const fetchChequesCadeaux = async () => {
+            if (userId) {
+                try {
+                    const response = await axios.get(`http://localhost:3001/chequecadeau/${userId}`, {
+                        headers: {
+                            accessToken: sessionStorage.getItem("accessToken")
+                        }
+                    });
+                    setChequesCadeaux(response.data);
+                    setLoading(false);
+                } catch (error) {
+                    setError('Failed to fetch gift cards data');
+                    console.error('Error fetching gift cards data:', error);
+                    setLoading(false);
                 }
             }
         };
 
         fetchUserData();
         fetchCarteFidelite();
-    }, [userId]); // useEffect dependency on userId
+        fetchChequesCadeaux();
+    }, [userId]);
 
     const handleUpdate = async () => {
         if (!isLoggedIn) {
             alert("Please log in to view your loyalty card");
-            navigate("/client"); // Redirect to login page
+            navigate("/client");
             return;
         }
 
@@ -71,7 +93,7 @@ function CarteFidelite() {
             });
 
             if (loyaltyResponse.status === 201) {
-                alert('points insuffisants');
+                alert('Points insuffisants');
                 return;
             }
 
@@ -89,32 +111,72 @@ function CarteFidelite() {
         }
     };
 
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = chequesCadeaux.slice(indexOfFirstItem, indexOfLastItem);
+
+    const paginate = pageNumber => setCurrentPage(pageNumber);
+
     if (!userId) {
-        return <Spinner animation="border" role="status"><span className="sr-only">Loading...</span></Spinner>; // Show loading spinner until userId is fetched
+        return <Spinner animation="border" role="status"><span className="sr-only">Loading...</span></Spinner>;
     }
 
     if (loading) {
-        return <Spinner animation="border" role="status"><span className="sr-only">Loading...</span></Spinner>; // Show loading spinner while fetching loyalty card data
+        return <Spinner animation="border" role="status"><span className="sr-only">Loading...</span></Spinner>;
     }
 
     if (error) {
-        return <Alert variant="danger">{error}</Alert>; // Show error message if fetching loyalty card data fails
+        return <Alert variant="danger">{error}</Alert>;
     }
 
     return (
-        <div className="carte-fidelite">
-            {carteFidelite ? (
+        <div className="carte-et-cheque-cadeau">
+            {carteFidelite && (
                 <div className='Carte-Fidelite'>
                     <h2 className='carteFidelité'>Carte de Fidélité</h2>
                     <p className='points'>Points: {carteFidelite.point}</p>
                     <p className='reste'>Reste: {carteFidelite.reste}</p>
                     <Button className='bouttonChequeCadeau' onClick={handleUpdate}>Convertir mes points en chèque cadeau</Button>
                 </div>
-            ) : (
-                <Alert variant="info">Aucune carte de fidélité trouvée pour ce client.</Alert>
             )}
+
+            <div className="cheques-cadeaux">
+                <h2 className="cheques-cadeaux-header">Chèques Cadeaux</h2>
+                <Row xs={1} md={2} lg={3} className="g-4">
+                    {currentItems.length > 0 ? (
+                        currentItems.map((cheque) => (
+                            <Col key={cheque.id}>
+                                <Card className='cheque-card'>
+                                    <Card.Body>
+                                        <Card.Title>{cheque.code}</Card.Title>
+                                        <Card.Subtitle className="mb-2 text-muted">
+                                            Date d'expiration: {new Date(cheque.date_expiration).toLocaleDateString()}
+                                        </Card.Subtitle>
+                                        <Card.Text>
+                                            Statut: {cheque.statut}
+                                        </Card.Text>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        ))
+                    ) : (
+                        <Alert variant="info" className="no-cheques-message">Aucun chèque cadeau trouvé pour ce client.</Alert>
+                    )}
+                </Row>
+
+                {chequesCadeaux.length > itemsPerPage && (
+                    <div className="pagination">
+                        <Button variant="outline-primary" onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>
+                            Précédent
+                        </Button>
+                        <Button variant="outline-primary" onClick={() => paginate(currentPage + 1)} disabled={indexOfLastItem >= chequesCadeaux.length}>
+                            Suivant
+                        </Button>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }
 
-export default CarteFidelite;
+export default CarteFidelite_ChequeCadeau;

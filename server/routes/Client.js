@@ -39,4 +39,14 @@ router.get('/me', validateToken, (req, res) => {
     res.json({ userId });
 });
 
+router.get('/count', async (req, res) => {
+    try {
+      const count = await Client.count();
+      res.json({ count });
+    } catch (error) {
+      console.error('Error counting clients:', error);
+      res.status(500).json({ error: 'Failed to count clients' });
+    }
+  });
+  
 module.exports = router;

@@ -30,6 +30,7 @@ router.get('/:idClient', async (req, res) => {
     }
 });
 
+
 router.get('/detail/:idAchat', async (req, res) => {
     const achatId = req.params.idAchat;
 
@@ -42,14 +43,23 @@ router.get('/detail/:idAchat', async (req, res) => {
             return res.status(200).json('Pas de détails correspondants pour cet achat');
         }
 
-        
+        const mappedDetails = await Promise.all(details.map(async detail => {
+            const produit = await Produit.findByPk(detail.id_produit, {
+                attributes: ['nom','ean1','prix'] // Specify the fields you want to include
+            });
 
-        const mappedDetails = details.map(detail => ({
-            id: detail.id,
-            quantite: detail.quantite,
-            point: detail.point,
-            total : detail.total
-            // Include other fields you want to send in the response
+            return {
+                id: detail.id,
+                id_produit: detail.id_produit,
+                quantite: detail.quantite,
+                point: detail.point,
+                total: detail.total,
+                produit: {
+                    nom: produit.nom,
+                    ean1: produit.ean1,
+                    prix: produit.prix
+                }
+            };
         }));
 
         res.json(mappedDetails);
@@ -58,5 +68,8 @@ router.get('/detail/:idAchat', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch details' });
     }
 });
+
+
+
 
 module.exports = router;

@@ -4,6 +4,10 @@ import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { PlusCircle } from 'phosphor-react';
 import axios from 'axios';
 import '../css/ClientHome.css';
+import Footer from '../Components/Footer';
+import Header from '../Components/Header';
+import SideNav from '../Components/SideNav';
+import NavBar from '../Components/NavBar'
 
 function ClientHome() {
     const [products, setProducts] = useState([]);
@@ -79,6 +83,8 @@ function ClientHome() {
     };
 
     return (
+        <div>
+            <NavBar/>
         <Container className="mt-5">
             <div className="product-section">
                 <h2 className="section-title">Liste des Produits</h2>
@@ -116,6 +122,9 @@ function ClientHome() {
                 </Row>
             </div>
         </Container>
+    
+        <Footer/>
+        </div>
     );
 }    
 export default ClientHome;

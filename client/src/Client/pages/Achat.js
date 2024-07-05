@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Table } from 'react-bootstrap';
 import '../css/Achat.css';
-
 
 function Achat() {
     const [userId, setUserId] = useState(null);
@@ -81,18 +80,35 @@ function Achat() {
                                     <Card.Text>Points: {achat.point}</Card.Text>
                                     <Card.Text>Total: {achat.total_achat} DH</Card.Text>
                                     <Button variant="primary" className='details-bttn' onClick={() => toggleDetails(achat.id)}>
-                                        
                                         {showDetails[achat.id] ? 'Masquer Détails' : 'Voir Détails'}
                                     </Button>
                                     {showDetails[achat.id] && (
                                         <div className="details-container mt-3">
                                             {achat.details.length > 0 ? (
-                                                achat.details.map((detail) => (
-                                                    <div key={detail.id} className="detail-item">
-                                                        <p>Quantité: {detail.quantite}</p>
-                                                        <p>Total: {detail.total}</p>
-                                                    </div>
-                                                ))
+                                                <Table striped bordered hover>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Nom du Produit</th>
+                                                            <th>EAN1</th>
+                                                            <th>Prix</th>
+                                                            <th>Quantité</th>
+                                                            <th>Point</th>
+                                                            <th>Total</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {achat.details.map((detail) => (
+                                                            <tr key={detail.id}>
+                                                                <td>{detail.produit.nom}</td>
+                                                                <td>{detail.produit.ean1}</td>
+                                                                <td>{detail.produit.prix}</td>
+                                                                <td>{detail.quantite}</td>
+                                                                <td>{detail.point}</td>
+                                                                <td>{detail.total}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </Table>
                                             ) : (
                                                 <p>Pas de détails disponibles pour cet achat.</p>
                                             )}
