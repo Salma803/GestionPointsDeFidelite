@@ -1,15 +1,20 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+
 
 function SideNav() {
+  let navigate = useNavigate();
+
+  const logout = () => {
+    sessionStorage.removeItem('accessToken');
+    navigate('/client/login');
+};
 
   return (
     <div>
-<aside className="main-sidebar sidebar-light-indigo elevation-4 " >
+<aside className="main-sidebar sidebar-light-yellow elevation-4 " >
   {/* Brand Logo */}
-  <a href="index3.html" className="brand-link">
-    <img src="/dist/img/user2-160x160.jpg" alt="AdminLTE Logo" className="brand-image img-circle elevation-3" style={{opacity: '.8'}} />
-    <span className="brand-text font-weight-light">Agent Fidélité</span>
-  </a>
+  
   {/* Sidebar */}
   <div className="sidebar">
     {/* Sidebar user panel (optional) */}
@@ -38,93 +43,73 @@ function SideNav() {
         {/* Add icons to the links using the .nav-icon class
          with font-awesome or any other icon font library */}
         <li className="nav-item menu-open">
-          <a href="/admin/home" className="nav-link active">
-            <i className="nav-icon fas fa-tachometer-alt" />
+          <a href="/cartefidelite" className="nav-link active" >
+            <i className="nav-icon fas fa-tachometer-alt"  />
             <p>
-              Dashboard
+              Acceuil
             </p>
           </a>
         </li>
-  
         <li className="nav-item">
-          <a href='/admin/creerclient' className="nav-link">
+          <a href='/client/magasin' className="nav-link">
             <i  className="nav-icon fas fa-user" />
             <p>
-              Création Client
+              Magasin
               
-              <span className="badge badge-info right">6</span>
+              <span className="badge badge-info right"></span>
+            </p>
+          </a>
+          
+        </li>
+  
+        <li className="nav-item">
+          <a href='/panier' className="nav-link">
+            <i  className="nav-icon fas fa-user" />
+            <p>
+              Mon panier
+              
+              <span className="badge badge-info right"></span>
             </p>
           </a>
           
         </li>
         <li className="nav-item">
-          <a href="/admin/listeclients" className="nav-link">
+          <a href="/achat" className="nav-link">
             <i className="nav-icon fas fa-edit" />
             <p>
-              Clients
-            </p>
-          </a>
-        </li>
-        <li className="nav-item">
-          <a href="/admin/cartefidelite" className="nav-link">
-            <i className="nav-icon fas fa-edit" />
-            <p>
-              Carte Fidélité
-              
-            </p>
-          </a>
-        </li>
-        <li className="nav-item">
-          <a href="/admin/chequecadeau" className="nav-link">
-            <i className="nav-icon fas fa-edit" />
-            <p>
-              Chéques Cadeaux
+              Mes Achats
             </p>
           </a>
         </li>
         <li className="nav-header">Paramétres</li>
         <li className="nav-item">
-          <a href="/admin/info" className="nav-link">
+          <a href="/client/info" className="nav-link">
             <i className="nav-icon fas fa-wrench" />
             <p>
               Mes infos
-              <span className="badge badge-info right">2</span>
-            </p>
-          </a>
-        </li>
-        <li className="nav-item">
-          <a href="pages" className="nav-link">
-            <i className="nav-icon fas fa-wrench" />
-            <p>
-              Email
-            </p>
-          </a>
-        </li>
-        <li className="nav-item">
-          <a href="pages/kanban.html" className="nav-link">
-            <i className="nav-icon fas fa-wrench" />
-            <p>
-              Mot de passe
+              <span className="badge badge-info right"></span>
             </p>
           </a>
         </li>
         <li className="nav-header">Centre</li>
         <li className="nav-item">
-          <a href="iframe.html" className="nav-link">
+          <a href="/client/reclamations" className="nav-link">
             <i className="nav-icon fas fa-ellipsis-h" />
             <p>Réclamations</p>
           </a>
         </li>
         <li className="nav-item">
-          <a href="iframe.html" className="nav-link">
-            <i className="nav-icon fas fa-ellipsis-h" />
-            <p>Réponses</p>
+          <a href="#" className="nav-link">
+            <i className="nav-icon fas fa-file" />
+            <p>Documentation</p>
           </a>
         </li>
         <li className="nav-item">
-          <a href="https://adminlte.io/docs/3.1/" className="nav-link">
-            <i className="nav-icon fas fa-file" />
-            <p>Documentation</p>
+          <a  onClick={logout} className="nav-link active">
+            <i   className="nav-icon fas fa-sign-out-alt" />
+            <p>
+              Se déconnecter
+            </p>
           </a>
         </li>
       </ul>

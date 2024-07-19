@@ -1,0 +1,23 @@
+.reclamation-bttns{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.reclamation-edit-bttn{
+  background-color: #7ca41d !important;
+  border-color: #7ca41d !important;
+  width: 60%;
+  margin: 2px;
+}
+.reclamation-traite-bttn{
+  background-color: #0f448c !important;
+  border-color: #0f448c !important;
+  width: 60%;
+  margin: 2px;
+}
+.reclamations-sauvegarder-bttn{
+  background-color: #109501 !important;
+  border-color: #109501  !important;
+  width: 60%;
+  margin: 2px;
+}

@@ -10,58 +10,49 @@ function generateUniqueCode() {
     return uuidv4().replace(/-/g, '').slice(0, 16); // Generate a 16-character code
 }
 
-router.post('/:idClient', async (req, res) => {
-    const idClient = req.params.idClient;
 
+const updateLoyaltyPointsAndCreateGiftCards = async () => {
     try {
-        // Fetch the client's loyalty card
-        let carteFidelite = await CarteFidelite.findOne({
-            where: { id_client: idClient }
-        });
+        const clients = await CarteFidelite.findAll();
 
-        // If loyalty card not found, create one
-        if (!carteFidelite) {
-            carteFidelite = await CarteFidelite.create({
-                id_client: idClient,
-                point: 0,
-                reste: 0
+        for (const client of clients) {
+            const idClient = client.id_client;
+            const carteFidelite = await CarteFidelite.findOne({
+                where: { id_client: idClient }
             });
-        }
 
-        // Check if points exceed 100
-        if (carteFidelite.point >= 100) {
-            const pointsToRedeem = Math.floor(carteFidelite.point / 100) * 100;
-            const newPoints = carteFidelite.point - pointsToRedeem;
-            const expirationDate = new Date();
-            expirationDate.setMonth(expirationDate.getMonth() + 1); // Set expiration date to one month from now
+            if (carteFidelite.point >= 100) {
+                const pointsToRedeem = Math.floor(carteFidelite.point / 100) * 100;
+                const newPoints = carteFidelite.point - pointsToRedeem;
+                const expirationDate = new Date();
+                expirationDate.setMonth(expirationDate.getMonth() + 1);
 
-            // Create gift cards for the client
-            const giftCards = [];
-            for (let i = 0; i < pointsToRedeem / 100; i++) {
-                giftCards.push({
-                    id_client: idClient,
-                    date_expiration: expirationDate,
-                    statut: 'valide',
-                    code: generateUniqueCode()
+                const giftCards = [];
+                for (let i = 0; i < pointsToRedeem / 100; i++) {
+                    giftCards.push({
+                        id_client: idClient,
+                        date_expiration: expirationDate,
+                        statut: 'Valide',
+                        code: generateUniqueCode()
+                    });
+                }
+                await ChequeCadeau.bulkCreate(giftCards);
+                await CarteFidelite.update(
+                    { point: newPoints },
+                    { where: { id_client: idClient }
                 });
             }
-            await ChequeCadeau.bulkCreate(giftCards);
-
-            // Update loyalty card with new points
-            await CarteFidelite.update(
-                { point: newPoints },
-                { where: { id_client: idClient } }
-            );
-
-            return res.status(200).json({ message: 'Gift cards created and loyalty points updated successfully' });
-        } else {
-            return res.status(201).json({ message: 'Insufficient points to create a gift card' });
         }
+        console.log('Gift cards created and loyalty points updated successfully');
     } catch (error) {
-        console.error('Error processing the request:', error);
-        return res.status(500).json({ error: 'Failed to process the request' });
+        console.error('Error processing the loyalty points:', error);
     }
+};
+cron.schedule('* * * * *', async () => {
+    console.log('Running the loyalty points update job');
+    await updateLoyaltyPointsAndCreateGiftCards();
 });
+
 //Voir les cheques cadeau d'un client donne en
 router.get('/:idClient', async (req, res) => {
     const idClient = req.params.idClient;
@@ -72,9 +63,7 @@ router.get('/:idClient', async (req, res) => {
             where: { id_client: idClient }
         });
         
-        if (giftCards.length === 0) {
-            return res.status(404).json({ message: 'No gift cards found for this client' });
-        }
+        
 
         return res.status(200).json(giftCards);
     } catch (error) {
@@ -192,25 +181,64 @@ function calculatePercentage(part, total) {
     }
 });
 
-cron.schedule('0 * * * *', async () => {
+router.get('/admin/pourcentage/timeline', async (req, res) => {
     try {
-        const cheques = await ChequeCadeau.findAll();
-        for (const cheque of cheques) {
-            if (cheque.date_expiration < new Date() && cheque.statut !== 'Expiré') {
-                cheque.statut = 'Expiré';
-                await cheque.save();
-            }
+        // Définir la plage de temps pour les données (par exemple, les 30 derniers jours)
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 30);
+        const endDate = new Date();
+
+        // Récupérer les chèques cadeaux créés dans la plage de temps
+        const giftCards = await ChequeCadeau.findAll({
+            where: {
+                createdAt: {
+                    [Op.gte]: startDate,
+                    [Op.lte]: endDate
+                }
+            },
+            attributes: ['statut', 'createdAt']
+        });
+
+        const data = {};
+
+        // Initialiser l'objet data avec toutes les dates dans la plage de temps
+        for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+            const dateStr = d.toISOString().split('T')[0];
+            data[dateStr] = { valid: 0, expired: 0, consumed: 0 };
         }
-        console.log('Statuts des chèques cadeaux mis à jour.');
+
+        // Remplir l'objet data avec les comptes réels des chèques cadeaux
+        giftCards.forEach(card => {
+            const date = card.createdAt.toISOString().split('T')[0]; // formater la date en YYYY-MM-DD
+            if (!data[date]) {
+                data[date] = { valid: 0, expired: 0, consumed: 0 };
+            }
+            if (card.statut === 'Valide') {
+                data[date].valid++;
+            } else if (card.statut === 'Expiré') {
+                data[date].expired++;
+            } else if (card.statut === 'Consommé') {
+                data[date].consumed++;
+            }
+        });
+
+        // Convertir l'objet data en tableau pour le graphique
+        const result = Object.keys(data).map(date => ({
+            date,
+            valid: data[date].valid,
+            expired: data[date].expired,
+            consumed: data[date].consumed
+        }));
+
+        res.json(result);
     } catch (error) {
-        console.error('Erreur lors de la mise à jour des statuts des chèques cadeaux:', error);
+        console.error('Error fetching gift card status timeline:', error);
+        res.status(500).json({ error: 'Failed to fetch gift card status timeline' });
     }
 });
 
 
-
-module.exports = router;
-cron.schedule('0 * * * *', async () => {
+cron.schedule('* * * * *', async () => {
     try {
         const cheques = await ChequeCadeau.findAll({
             where: {
@@ -230,3 +258,5 @@ cron.schedule('0 * * * *', async () => {
         console.error('Erreur lors de la mise à jour des statuts des chèques cadeaux:', error);
     }
 });
+
+module.exports = router;

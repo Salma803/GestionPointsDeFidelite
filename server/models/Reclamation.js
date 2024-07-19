@@ -1,8 +1,20 @@
 module.exports = (sequelize, DataTypes) => {
     const Reclamation = sequelize.define("Reclamation", {
+        objet:{
+            type:DataTypes.STRING,
+            allowNull:false,
+        },
         contenu: {
             type: DataTypes.STRING, // Assuming content is a string, not DATE
             allowNull: false,
+        },
+        statut:{
+            type : DataTypes.STRING,
+            allowNull: false,
+        },
+        réponse:{
+            type: DataTypes.STRING,
+            allowNull:true,
         },
         createdAt: {
             type: DataTypes.DATE,

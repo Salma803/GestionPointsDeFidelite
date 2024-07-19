@@ -27,7 +27,7 @@ router.post('/login', async (req, res) => {
         }
         // Successful login
         const accessToken = jwt.sign( { email :user.email,  id :user.id }, "secret", {expiresIn: '1h'});
-        res.json({ accessToken });
+        res.json({ accessToken, role: user.role });
 
     } catch (error) {
         console.error('Error logging in:', error);
@@ -203,13 +203,14 @@ router.get('/find/:adminID', async (req, res) => {
     }
 });
 
+
 router.put('/changer/:adminId', async (req, res) => {
     const { adminId } = req.params;
-    const { email, password } = req.body;
+    const { email, adresse, currentPassword, newPassword } = req.body;
 
     // Valider les données d'entrée
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password are required' });
+    if (!currentPassword) {
+        return res.status(400).json({ error: 'Current password is required' });
     }
 
     try {
@@ -220,18 +221,61 @@ router.put('/changer/:adminId', async (req, res) => {
             return res.status(404).json({ error: 'Admin not found' });
         }
 
-        // Hacher le nouveau mot de passe
+        // Vérifier le mot de passe actuel
+        if (currentPassword != admin.mot_de_passe) {
+            return res.status(401).json({ error: 'Incorrect current password' });
+        }
 
-        // Mettre à jour les champs email et mot de passe
-        admin.email = email;
-        admin.mot_de_passe = password;
+        // Mettre à jour les champs email, adresse et nouveau mot de passe si fournis
+        if (email) {
+            admin.email = email;
+        }
+
+        if (newPassword) {
+            const saltRounds = 10;
+            admin.mot_de_passe = newPassword;
+        }
+
+        if (adresse) {
+            admin.adresse = adresse;
+        }
+
         await admin.save();
 
-        res.json({ message: 'Admin email and password updated successfully' });
+        res.json({ message: 'Admin details updated successfully' });
     } catch (error) {
-        console.error('Error updating admin email and password:', error);
-        res.status(500).json({ error: 'Failed to update admin email and password' });
+        console.error('Error updating admin details:', error);
+        res.status(500).json({ error: 'Failed to update admin details' });
     }
 });
+router.get('/checkloyaltymanager', validateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;; // Assuming the token sets req.user
+        const user = await Admin.findByPk(userId); // Fetch user details from the database
+        
+        if (user.role === 'LoyaltyManager') {
+            return res.status(200).json({ isLoyaltyManager: true });
+        } else {
+            return res.status(200).json({ isLoyaltyManager: false });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+router.get('/checkproductmanager', validateToken, async (req, res) => {
+    try {
+        const userId = req.user.id;; // Assuming the token sets req.user
+        const user = await Admin.findByPk(userId); // Fetch user details from the database
+        
+        if (user.role === 'ProductManager') {
+            return res.status(200).json({ isProductManager: true });
+        } else {
+            return res.status(200).json({ isProductManager: false });
+        }
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 
 module.exports = router;

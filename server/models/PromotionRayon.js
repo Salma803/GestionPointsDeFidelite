@@ -4,10 +4,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER, 
             allowNull: false,
         },
-        date_fin:{
-            type: DataTypes.DATE, 
+        date_fin: {
+            type: DataTypes.DATE,
         },
-        date_debut:{
+        date_debut: {
             type: DataTypes.DATE,
             allowNull: false,
         },
@@ -21,15 +21,12 @@ module.exports = (sequelize, DataTypes) => {
         }
     });
 
-    
     PromotionRayon.associate = (models) => {
         PromotionRayon.belongsTo(models.Rayon, {
             foreignKey: 'id_rayon',
             onDelete: 'CASCADE'
         });
-        
     };
-
 
     return PromotionRayon;
 };

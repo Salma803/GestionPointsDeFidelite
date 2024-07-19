@@ -1,0 +1,47 @@
+
+.required-field {
+    color: red !important;
+    border: 1px solid red !important; /* Exemple de style pour indiquer un champ requis */
+  }
+
+.admin-produit-form{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+
+}
+.admin-produit-form-home{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px;
+  width: 40%;
+
+}
+.admin-produit-form-container{
+  width: 100%;
+  padding: 20px;
+  box-shadow:0px 0px 24px #000000;
+}
+.admin-rayon-form{
+  background-color: aqua;
+}
+
+
+table {
+  table-layout: auto; /* Ensures table adjusts to the content */
+  width: 100%; /* Optional: Makes the table take the full width of the container */
+  border-collapse: collapse; /* Ensures borders are collapsed for better visual layout */
+}
+
+td, th {
+  white-space: normal; /* Allows text to wrap to the next line */
+  overflow: visible; /* Ensures content is visible and not hidden */
+  padding: 8px; /* Adds padding for better spacing */
+  box-sizing: border-box; /* Includes padding and border in the element's total width and height */
+  border: 1px solid #ddd; /* Adds border for better visibility */
+  word-break: break-word; /* Ensures long words break and wrap */
+}
+
+

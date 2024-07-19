@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const moment = require('moment');
-const { Regle } = require('../models'); // Assurez-vous d'importer correctement votre modèle Regle
+const { Regle,Rayon } = require('../models'); // Assurez-vous d'importer correctement votre modèle Regle
 
 router.post('/', async (req, res) => {
     const { multiplicite, date_debut, date_fin, id_rayon } = req.body;
@@ -46,5 +46,38 @@ router.post('/', async (req, res) => {
         res.status(500).json({ error: 'Echec lors de la création de la règle' });
     }
 });
+router.put('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { multiplicite, date_debut, date_fin } = req.body;
+
+    try {
+        const updatedRegle = await Regle.update(
+            { multiplicite, date_debut, date_fin },
+            { where: { id } }
+        );
+
+        res.status(200).json(updatedRegle);
+    } catch (error) {
+        console.error('Error updating Regle:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+router.get('/', async (req, res) => {
+    try {
+        const regles = await Regle.findAll({
+            include: {
+                model: Rayon,
+                attributes: ['nom'], // Only select the 'nom' attribute from the Rayon model
+            }
+        });
+
+        res.status(200).json(regles);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des règles:', error);
+        res.status(500).json({ error: 'Echec lors de la récupération des règles' });
+    }
+});
+
 
 module.exports = router;

@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import { Container, Row, Col, Card } from 'react-bootstrap';
 import { PlusCircle } from 'phosphor-react';
 import axios from 'axios';
 import '../css/ClientHome.css';
 import Footer from '../Components/Footer';
 import Header from '../Components/Header';
 import SideNav from '../Components/SideNav';
-import NavBar from '../Components/NavBar'
+import UseAuthClient from '../hooks/UseAuthClient';
 
 function ClientHome() {
+    const isAuthenticated = UseAuthClient();
     const [products, setProducts] = useState([]);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userId, setUserId] = useState(null);
@@ -38,7 +39,7 @@ function ClientHome() {
                     .then((response) => {
                         const products = response.data.map(product => ({
                             ...product,
-                            image: `${process.env.PUBLIC_URL}/${product.id}.png` , // Assuming image files are named like '1.png', '2.png', etc.
+                            image: `${process.env.PUBLIC_URL}/${product.id}.png`, // Assuming image files are named like '1.png', '2.png', etc.
                         }));
                         setProducts(products);
                     })
@@ -72,59 +73,75 @@ function ClientHome() {
                 accessToken: sessionStorage.getItem("accessToken")
             }
         })
-        .then((response) => {
-            console.log('Product added to cart:', response.data);
-            alert('Product added to cart');
-        })
-        .catch((error) => {
-            console.error('Error adding product to cart:', error);
-            alert('Error adding product to cart');
-        });
+            .then((response) => {
+                console.log('Product added to cart:', response.data);
+                alert('Product added to cart');
+            })
+            .catch((error) => {
+                console.error('Error adding product to cart:', error);
+                alert('Error adding product to cart');
+            });
     };
 
     return (
         <div>
-            <NavBar/>
-        <Container className="mt-5">
-            <div className="product-section">
-                <h2 className="section-title">Liste des Produits</h2>
-                <Row xs={1} md={2} lg={3} className="g-4">
-                    {products.map((product) => (
-                        <Col key={product.id}>
-                            <Card className="product-card">
-                                <Link to={`/client/produit/${product.id}`}>
-                                    <div className="image-div">
-                                        <Card.Img variant="top" src={product.image} alt={product.nom} className="product-image" />
-                                    </div>
-                                </Link>
-                                <Card.Body>
-                                    <Card.Title>{product.nom}</Card.Title>
-                                    <Card.Text>{product.description}</Card.Text>
-                                    {!product.active && (
-                                        <Card.Text className="prix">Prix: {product.prixAvantSolde} DH</Card.Text>
-                                    )}
-                                    {product.active && (
-                                        <>
-                                            <Card.Text className="Solde">Promotion: {product.valeurSolde}%</Card.Text>
-                                            <div>
-                                                <Card.Text className="prixNSolde">{product.prixAvantSolde} DH</Card.Text>
-                                                <Card.Text className="prixSolde">{product.prixApresSolde} DH</Card.Text>
-                                            </div>
-                                        </>
-                                    )}
-                                    <Button variant="secondary" onClick={() => addToCart(product.id)}>
-                                        <PlusCircle size={24} />
-                                    </Button>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    ))}
-                </Row>
+            <Header />
+            <SideNav />
+            <div className='client-products-body'>
+                <Container className="client-products-container">
+                    <div className="client-product-section">
+                        <div className='client-cf-screen__content'>
+                            <div className="client-cf-screen__background">
+                                <span className="client-cf-screen__background__shape client-cf-screen__background__shape4"></span>
+                                <span className="client-cf-screen__background__shape client-products-screen__background__shape6"></span>
+                                <span className="client-cf-screen__background__shape client-cf-screen__background__shape5"></span>
+                                <span className="client-cf-screen__background__shape client-cf-screen__background__shape3"></span>
+                                <span className="client-cf-screen__background__shape client-cf-screen__background__shape2"></span>
+                                <span className="client-cf-screen__background__shape client-cf-screen__background__shape1"></span>
+                            </div>
+                            <div className='client-product-cards'>
+                                <Row xs={1} md={2} lg={3} className="g-4">
+                                    {products.map((product) => (
+                                        <Col key={product.id}>
+                                            <Card >
+                                                <div className="client-product-card-home">
+                                                    <div className='client-products-image-div'>
+                                                        <Link to={`/client/produit/${product.id}`}>
+                                                            <div className="client-product-image">
+                                                                <Card.Img src={product.image} alt={product.nom} className="product-image" />
+                                                            </div>
+                                                        </Link>
+                                                    </div>
+                                                    <Card.Body className='client-product-card-body'>
+                                                        <Card.Title className='client-product-title'>{product.nom}</Card.Title>
+                                                        <Card.Text className='client-product-text' >{product.description}</Card.Text>
+                                                        {!product.active && (
+                                                            <Card.Text className="client-product-price">Prix: {product.prixAvantSolde} DH</Card.Text>
+                                                        )}
+                                                        {product.active && (
+                                                            <>
+                                                                <Card.Text className="client-product-solde">Promotion: {product.valeurSolde}%</Card.Text>
+                                                                <div className="client-product-price-container">
+                <Card.Text className="client-product-PNS">{product.prixAvantSolde} DH</Card.Text>
+                <Card.Text className="client-product-PS">{product.prixApresSolde} DH</Card.Text>
             </div>
-        </Container>
-    
-        <Footer/>
+                                                            </>
+                                                        )}
+                                                        <PlusCircle className='client-button-addToCart' size={24} onClick={() => addToCart(product.id)} />
+                                                    </Card.Body>
+                                                </div>
+                                            </Card>
+                                        </Col>
+                                    ))}
+                                </Row>
+                            </div>
+                        </div>
+                    </div>
+                </Container>
+            </div>
+            <Footer />
         </div>
     );
-}    
+}
+
 export default ClientHome;

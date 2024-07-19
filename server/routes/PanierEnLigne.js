@@ -254,8 +254,7 @@ router.post('/achat/:clientId', async (req, res) => {
         }
 
         // Calculer la somme totale des quantités multipliées par le prix des produits
-        let totalSum1 = 0;
-        let totalSum2 = 0;
+        let totalSum = 0;
         let totalPoints = 0;
 
         for (const item of panierItems) {
@@ -269,79 +268,61 @@ router.post('/achat/:clientId', async (req, res) => {
             const promotionProduit = await PromotionProduit.findOne({
                 where: {
                     id_produit: produit.id,
-                    valeur: {
-                        [Op.ne]: 0 // Non-zero value indicates an active promotion
-                    },
-                    date_debut: {
-                        [Op.lte]: new Date() // Promotion start date is before or equal to today
-                    },
-                    date_fin: {
-                        [Op.gte]: new Date() // Promotion end date is after or equal to today
-                    }
+                    valeur: { [Op.ne]: 0 },
+                    date_debut: { [Op.lte]: new Date() },
+                    date_fin: { [Op.gte]: new Date() }
                 }
             });
 
-            if (promotionProduit) {
+            const promotionRayon = await PromotionRayon.findOne({
+                where: {
+                    id_rayon: produit.id_rayon,
+                    valeur: { [Op.ne]: 0 },
+                    date_debut: { [Op.lte]: new Date() },
+                    date_fin: { [Op.gte]: new Date() }
+                }
+            });
+
+            if (promotionProduit && promotionRayon) {
+                estSolde = true;
+                valeurSolde = Math.max(promotionProduit.valeur, promotionRayon.valeur);
+            } else if (promotionProduit) {
                 estSolde = true;
                 valeurSolde = promotionProduit.valeur;
-            } else {
-                // Check for rayon-level promotion if no product-level promotion found
-                const promotionRayon = await PromotionRayon.findOne({
-                    where: {
-                        id_rayon: produit.id_rayon,
-                        valeur: {
-                            [Op.ne]: 0 // Non-zero value indicates an active promotion
-                        },
-                        date_debut: {
-                            [Op.lte]: new Date() // Promotion start date is before or equal to today
-                        },
-                        date_fin: {
-                            [Op.gte]: new Date() // Promotion end date is after or equal to today
-                        }
-                    }
-                });
-
-                if (promotionRayon) {
-                    estSolde = true;
-                    valeurSolde = promotionRayon.valeur;
-                }
+            } else if (promotionRayon) {
+                estSolde = true;
+                valeurSolde = promotionRayon.valeur;
             }
 
             // Calculate price after discount if product is soldé
-            let prixApresSolde;
-            const regle = await Regle.findOne({
-                where: { id_rayon: produit.id_rayon }
-            });
-            const multiplicite = regle ? regle.multiplicite : 1;
+            let prixApresSolde = estSolde ? produit.prix - (produit.prix * (valeurSolde / 100)) : produit.prix;
 
-            if (estSolde) {
-                prixApresSolde = produit.prix - (produit.prix * (valeurSolde / 100));
-            } else {
-                prixApresSolde = produit.prix;
+            // Add points only for products not on sale
+            if (!estSolde) {
+                const regle = await Regle.findOne({
+                    where: { id_rayon: produit.id_rayon }
+                });
+                const multiplicite = regle ? regle.multiplicite : 1;
+                totalPoints += produit.prix * item.quantité * multiplicite;
             }
 
-            totalPoints += Math.floor(produit.prix * item.quantité * multiplicite);
-            totalSum2 += prixApresSolde * item.quantité;
-            totalSum1 += prixApresSolde * item.quantité;
+            totalSum += prixApresSolde * item.quantité;
         }
 
-        console.log('Total sum:', totalSum1);
+        console.log('Total sum:', totalSum);
         console.log('Total points:', totalPoints);
 
         // Définir point et reste
-        let point = totalPoints;
-        let reste = totalSum2 - totalPoints;
+        let point = Math.floor(totalPoints);
+        let reste = totalPoints - point;
 
-        // Adjust reste to be less than 1 and a decimal
-        while (reste >= 1) {
-            point += 1;
-            reste -= 1;
-        }
+        // Adjust reste to be non-negative
+        
 
         // Créer une nouvelle ligne dans la table Achat
         const nouvelAchat = await Achat.create({
             id_client: clientId,
-            total: totalSum1,
+            total: totalSum,
             point: point,
             reste: reste,
             id_magasin: 1 // Assuming store ID 1 for now
@@ -359,54 +340,40 @@ router.post('/achat/:clientId', async (req, res) => {
             const promotionProduit = await PromotionProduit.findOne({
                 where: {
                     id_produit: produit.id,
-                    valeur: {
-                        [Op.ne]: 0
-                    },
-                    date_debut: {
-                        [Op.lte]: new Date()
-                    },
-                    date_fin: {
-                        [Op.gte]: new Date()
-                    }
+                    valeur: { [Op.ne]: 0 },
+                    date_debut: { [Op.lte]: new Date() },
+                    date_fin: { [Op.gte]: new Date() }
                 }
             });
 
-            if (promotionProduit) {
+            const promotionRayon = await PromotionRayon.findOne({
+                where: {
+                    id_rayon: produit.id_rayon,
+                    valeur: { [Op.ne]: 0 },
+                    date_debut: { [Op.lte]: new Date() },
+                    date_fin: { [Op.gte]: new Date() }
+                }
+            });
+
+            if (promotionProduit && promotionRayon) {
+                estSolde = true;
+                valeurSolde = Math.max(promotionProduit.valeur, promotionRayon.valeur);
+            } else if (promotionProduit) {
                 estSolde = true;
                 valeurSolde = promotionProduit.valeur;
-            } else {
-                const promotionRayon = await PromotionRayon.findOne({
-                    where: {
-                        id_rayon: produit.id_rayon,
-                        valeur: {
-                            [Op.ne]: 0
-                        },
-                        date_debut: {
-                            [Op.lte]: new Date()
-                        },
-                        date_fin: {
-                            [Op.gte]: new Date()
-                        }
-                    }
-                });
-
-                if (promotionRayon) {
-                    estSolde = true;
-                    valeurSolde = promotionRayon.valeur;
-                }
+            } else if (promotionRayon) {
+                estSolde = true;
+                valeurSolde = promotionRayon.valeur;
             }
 
+            let prixApresSolde = estSolde ? produit.prix - (produit.prix * (valeurSolde / 100)) : produit.prix;
             let pointDetail = 0;
-            let prixApresSolde;
 
-            if (estSolde) {
-                prixApresSolde = produit.prix - (produit.prix * (valeurSolde / 100));
-            } else {
+            if (!estSolde) {
                 const regle = await Regle.findOne({
                     where: { id_rayon: produit.id_rayon }
                 });
                 const multiplicite = regle ? regle.multiplicite : 1;
-                prixApresSolde = produit.prix;
                 pointDetail = Math.floor(produit.prix * item.quantité * multiplicite);
             }
 
@@ -435,6 +402,8 @@ router.post('/achat/:clientId', async (req, res) => {
         res.status(500).json({ error: 'Erreur lors de l\'ajout de l\'achat et des détails' });
     }
 });
+
+
 
 
 

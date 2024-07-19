@@ -1,0 +1,47 @@
+.info-edit-button{
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+}
+.Edit-info-button,.Save-info-button {
+    background-color: chartreuse !important;
+    border-color: chartreuse !important;
+}
+.client-info-titre{
+display: flex;
+font-weight: bold;
+justify-content: center;
+box-shadow:0px 0px 3px #000000;
+font-size: 20px;
+border-radius: 20px;
+padding: 5px;
+margin-bottom: 30px !important;
+margin: 10px;
+
+}
+.client-info-card.card{
+    box-shadow:0px 0px 10px #000000;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+
+}
+.client-info-container.container{
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    margin: 0 !important;
+}
+.client-info-body{
+    background: linear-gradient(270deg, #bce315,white );
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.client-save-cancel-info{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 30px;
+}

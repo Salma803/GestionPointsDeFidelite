@@ -1,18 +1,31 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Spinner, Alert, Card, Col, Row } from 'react-bootstrap';
+import { Button, Spinner, Alert, Table, Dropdown, DropdownButton } from 'react-bootstrap';
 import axios from 'axios';
 import '../css/CarteFidelite.css';
+import { faSyncAlt } from '@fortawesome/free-solid-svg-icons';
+import UseAuthClient from '../hooks/UseAuthClient';
+import NavBar from '../Components/NavBar';
+import Header from '../Components/Header';
+import Footer from '../Components/Footer';
+import SideNav from '../Components/SideNav';
 
 function CarteFidelite_ChequeCadeau() {
+    const isAuthenticated = UseAuthClient();
     const [chequesCadeaux, setChequesCadeaux] = useState([]);
     const [carteFidelite, setCarteFidelite] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [userId, setUserId] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1); // Current page of gift cards
-    const [itemsPerPage] = useState(6); // Number of items per page
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(6);
+    const [sortOrder, setSortOrder] = useState('asc');
+    const [filterStatus, setFilterStatus] = useState('All');
+    const [isBackVisible, setIsBackVisible] = useState(false);
+    const [cc, setCc] = useState(true);
+    const [hidden, setHidden] = useState(true);
+
     let navigate = useNavigate();
 
     useEffect(() => {
@@ -63,10 +76,16 @@ function CarteFidelite_ChequeCadeau() {
                             accessToken: sessionStorage.getItem("accessToken")
                         }
                     });
+
                     setChequesCadeaux(response.data);
                     setLoading(false);
                 } catch (error) {
-                    setError('Failed to fetch gift cards data');
+                    if (error.response && error.response.status === 404) {
+                        setError('Vous n\'avez pas encore de chéque cadeau ');
+                        setCc(false);
+                    } else {
+                        setError('Failed to fetch gift cards data');
+                    }
                     console.error('Error fetching gift cards data:', error);
                     setLoading(false);
                 }
@@ -111,9 +130,35 @@ function CarteFidelite_ChequeCadeau() {
         }
     };
 
+    const handleSort = () => {
+        const sorted = [...chequesCadeaux].sort((a, b) => {
+            const dateA = new Date(a.date_expiration);
+            const dateB = new Date(b.date_expiration);
+
+            return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+        });
+
+        setChequesCadeaux(sorted);
+        setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    };
+
+    const handleFilter = (status) => {
+        setFilterStatus(status);
+    };
+
+    const handleCardClick = () => {
+        setIsBackVisible(!isBackVisible);
+    };
+
+    const handleCardHide = () => {
+        setHidden(!hidden);
+    };
+
+    const filteredCheques = filterStatus === 'All' ? chequesCadeaux : chequesCadeaux.filter(cheque => cheque.statut === filterStatus);
+
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = chequesCadeaux.slice(indexOfFirstItem, indexOfLastItem);
+    const currentItems = filteredCheques.slice(indexOfFirstItem, indexOfLastItem);
 
     const paginate = pageNumber => setCurrentPage(pageNumber);
 
@@ -130,51 +175,113 @@ function CarteFidelite_ChequeCadeau() {
     }
 
     return (
-        <div className="carte-et-cheque-cadeau">
-            {carteFidelite && (
-                <div className='Carte-Fidelite'>
-                    <h2 className='carteFidelité'>Carte de Fidélité</h2>
-                    <p className='points'>Points: {carteFidelite.point}</p>
-                    <p className='reste'>Reste: {carteFidelite.reste}</p>
-                    <Button className='bouttonChequeCadeau' onClick={handleUpdate}>Convertir mes points en chèque cadeau</Button>
-                </div>
-            )}
-
-            <div className="cheques-cadeaux">
-                <h2 className="cheques-cadeaux-header">Chèques Cadeaux</h2>
-                <Row xs={1} md={2} lg={3} className="g-4">
-                    {currentItems.length > 0 ? (
-                        currentItems.map((cheque) => (
-                            <Col key={cheque.id}>
-                                <Card className='cheque-card'>
-                                    <Card.Body>
-                                        <Card.Title>{cheque.code}</Card.Title>
-                                        <Card.Subtitle className="mb-2 text-muted">
-                                            Date d'expiration: {new Date(cheque.date_expiration).toLocaleDateString()}
-                                        </Card.Subtitle>
-                                        <Card.Text>
-                                            Statut: {cheque.statut}
-                                        </Card.Text>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        ))
-                    ) : (
-                        <Alert variant="info" className="no-cheques-message">Aucun chèque cadeau trouvé pour ce client.</Alert>
-                    )}
-                </Row>
-
-                {chequesCadeaux.length > itemsPerPage && (
-                    <div className="pagination">
-                        <Button variant="outline-primary" onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>
-                            Précédent
-                        </Button>
-                        <Button variant="outline-primary" onClick={() => paginate(currentPage + 1)} disabled={indexOfLastItem >= chequesCadeaux.length}>
-                            Suivant
-                        </Button>
-                    </div>
-                )}
+        <div>
+            <SideNav/>
+            <Header/>
+            <body className='client-cf-body'>
+            <div className="client-cf-screen__background">
+                    <span className="client-cf-screen__background__shape client-cf-screen__background__shape4"></span>
+                    <span className="client-cf-screen__background__shape client-cf-screen__background__shape3"></span>
+                    <span className="client-cf-screen__background__shape client-cf-screen__background__shape2"></span>
+                    <span className="client-cf-screen__background__shape client-cf-screen__background__shape1"></span>
             </div>
+            <div className='client-cf-screen__content'>
+                <div className="client-cf-et-cc">
+                    
+                    <div className='client-cf'>
+                        {carteFidelite && carteFidelite.Client && (
+                            <div className='client-cf-front' onDoubleClick={handleCardClick}>
+                                <div className="client-cf-screen__background">
+                                    <span className="client-cf-screen__background__shape screen__background__shape4"></span>
+                                    <span className="client-cf-screen__background__shape screen__background__shape3"></span>
+                                    <span className="client-cf-screen__background__shape screen__background__shape2"></span>
+                                    <span className="client-cf-screen__background__shape screen__background__shape1"></span>
+                                </div>
+                                <div className='client-cf-screen__content'>
+                                <faSyncAlt onClick={handleUpdate} style={{ cursor: 'pointer', marginLeft: '10px' }} />
+                                <h2 className='client-titre-cf'>Carte de Fidélité</h2>
+                                <p className='client-nom'>Nom: {carteFidelite.Client.nom}</p>
+                                <p className='client-prenom'>Prénom: {carteFidelite.Client.prenom}</p>
+                                </div>
+                                
+                            </div>
+                        )}
+                        {carteFidelite && carteFidelite.Client && (
+                            <div className={`client-cf-back ${isBackVisible ? 'show' : ''}`}>
+                                <div className="client-cf-screen__background">
+                                    <span className="client-cf-screen__background__shape screen__background__shape4"></span>
+                                    <span className="client-cf-screen__background__shape screen__background__shape3"></span>
+                                    <span className="client-cf-screen__background__shape screen__background__shape2"></span>
+                                    <span className="client-cf-screen__background__shape screen__background__shape1"></span>
+                                </div>
+                                 <div className='client-cf-screen__content'>
+                                <faSyncAlt onClick={handleUpdate} style={{ cursor: 'pointer', marginLeft: '10px' }} />
+                                <p className='client-point-cf'>Points: {carteFidelite.point}</p>
+                                <p className='client-reste-cf'>Reste: {carteFidelite.reste}</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="client-cc">
+                        <h2 className="client-titre-cc">Chèques Cadeaux</h2>
+
+                        <div className="client-actions-cc">
+                            <Button className='client-cc-bttn-sort' variant="outline-secondary" onClick={handleSort}>
+                                Sort by Date Expiration ({sortOrder === 'asc' ? 'Ascending' : 'Descending'})
+                            </Button>
+                            <DropdownButton className='client-cc-filter' variant="outline-secondary" id="dropdown-basic-button" title={`Filter by Status: ${filterStatus}`}>
+                                <Dropdown.Item onClick={() => handleFilter('All')}>All</Dropdown.Item>
+                                <Dropdown.Item onClick={() => handleFilter('Valide')}>Valide</Dropdown.Item>
+                                <Dropdown.Item onClick={() => handleFilter('expiré')}>Expirée</Dropdown.Item>
+                                <Dropdown.Item onClick={() => handleFilter('consommé')}>Consommée</Dropdown.Item>
+                            </DropdownButton>
+                        </div>
+
+                        <Table className='client-table-cc' striped bordered hover>
+                            <thead>
+                                <tr>
+                                    <th className='client-cc-code-header'>Code</th>
+                                    <th className='client-cc-date-expiration-header'>Date Expiration</th>
+                                    <th className='client-cc-statut-header'>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {chequesCadeaux.length >0 ? (
+                                    currentItems.map((cheque) => (
+                                        <tr key={cheque.id}>
+                                            <td className='client-cc-code-content'>{cheque.code}</td>
+                                            <td className='client-cc-date-expiration-content'>{new Date(cheque.date_expiration).toLocaleDateString()}</td>
+                                            <td className='client-cc-statut-content'>{cheque.statut}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    
+                                    <tr>
+                                    <td colSpan="3">
+                                        <Alert variant="info" className="no-cc-message">Vous n'avez pas encore de chéque cadeaux.</Alert>
+                                    </td>
+                                </tr>
+                                        
+                                )}
+                            </tbody>
+                        </Table>
+
+                        {filteredCheques.length > itemsPerPage && (
+                            <div className="pagination">
+                                <Button variant="outline-primary" onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1}>
+                                    Précédent
+                                </Button>
+                                <Button variant="outline-primary" onClick={() => paginate(currentPage + 1)} disabled={indexOfLastItem >= filteredCheques.length}>
+                                    Suivant
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+                </div>
+                </body>
+            <Footer />
         </div>
     );
 }

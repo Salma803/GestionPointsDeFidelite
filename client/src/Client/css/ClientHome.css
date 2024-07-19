@@ -1,85 +1,177 @@
-
-body {
-    background-color: #f8f9fa;
+html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
 }
-.product-section {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.product-card {
-    height: 100% !important; /* Ensures each product card takes up full height */
+.table {
+    width: 100%; 
+    table-layout: fixed; 
 }
 
-.product-card .card-body {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100% !important; /* Ensures card body takes full height of product card */
-}
-
-.image-div {
-    width: 100%;
-    height: 200px;
-    overflow: hidden;
-}
-
-.product-image {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: scale-down !important;
-}
-
-.product-card {
-    margin-bottom: 20px;
-}
-
-.product-card .card-body {
+.client-products-body {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
+    min-height: 100%;
+    background: linear-gradient(270deg, #bce315,white );
 }
 
-.section-title {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #343a40;
+.client-product-section {
+    box-shadow:0px 0px 24px #000000;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    padding: 20px; /* Add some padding for better spacing */
+    flex: 1; /* Allow it to grow and fill the remaining space */
 }
 
-.prix,
-.prixNSolde,
-.Solde,
-.prixSolde {
-    color: #343a40;
-    margin-bottom: 10px;
+.client-product-cards {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    padding: 20px; /* Add some padding for better spacing */
+    box-sizing: border-box; /* Ensure padding and border are included in element's total width and height */
 }
 
-.prixNSolde {
-    text-decoration: line-through;
-    color: #dc3545 !important;
+.client-products-container {
+    flex: 1; /* Allow it to grow and fill the remaining space */
 }
 
-.Solde {
-    color: #28a745 !important;
+.client-products-section-title {
+    margin: 20px 0; /* Add some margin for better spacing */
 }
 
-.prixSolde {
-    font-weight: bold;
-    color: #007bff !important;
+.client-product-card-home {
+    box-shadow: 0px 0px 10px #0000005f;
+    height: 300px;
+    width: 300px;
+    display: flex;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Add transition for smooth effect */
 }
 
-.btn-secondary {
-    background-color: #55577d;
-    border-color: #55577d;
+.client-product-card-home:hover {
+    transform: scale(1.02) ; /* Scale up slightly and move up */
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5); /* Add a stronger shadow for depth */
+}
+.client-product-card-body{
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
 }
 
-.btn-secondary:hover {
-    background-color: #2c3276 ;
-    border-color: #2c3276 ;
+.client-product-image{
+    width: 80%;
+
+    margin: 20px;
+    box-shadow:0px 0px 10px #0000005f;
+}
+.client-products-image-div{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 50%;
 }
 
-.btn-secondary .phosphor-icon {
-    margin-right: 8px;
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0; /* Add some margin for better spacing */
+}
+
+.pagination-button {
+    margin: 0 10px; /* Add some margin between buttons */
+}
+
+.page-number {
+    margin: 0 10px; /* Add some margin between buttons and page number */
+}
+.client-cf-screen__background__shape5 {
+    z-index: 0;
+      height: 400px;
+      width: 200px;
+      background: #bce315;	
+      top: 900px;
+      right: -50px;	
+      border-radius: 60px;
+  }
+.client-products-screen__background__shape6{
+    z-index: 0;
+      height: 500px;
+      width: 100px;
+      background: linear-gradient(270deg, #bce315, #0f448c);	
+      top: 500px;
+      right: -50px;	
+      border-radius: 60px;
+}
+.client-button-addToCart{
+    background-color: #bce315;
+    height: 40px;
+    width: 40px;
+    margin-top: 10px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+/* Style for the product title */
+.client-product-title {
+    font-size: 1.5em; /* Increase font size */
+    font-weight: bold; /* Make it bold */
+    color: #0f448c; /* Set a custom color */
+    margin-bottom: 10px; /* Add some space below the title */
+    text-align: center; /* Center the text */
+}
+
+/* Style for the product description */
+.client-product-text {
+    font-size: 1em; /* Set the font size */
+    color: #333; /* Set a custom color */
+    margin-bottom: 10px; /* Add some space below the text */
+    text-align: center; /* Center the text */
+}
+
+/* Style for the regular price */
+.client-product-price {
+    font-size: 1.2em; /* Increase font size */
+    color: #b12704; /* Set a red color for the price */
+    font-weight: bold; /* Make it bold */
+    text-align: center; /* Center the text */
+    margin-bottom: 10px; /* Add some space below the price */
+}
+
+/* Style for the promotion label */
+.client-product-solde {
+    font-size: 1em; /* Set the font size */
+    color: #ff9900; /* Set a custom color for the promotion label */
+    font-weight: bold; /* Make it bold */
+    text-align: center; /* Center the text */
+    margin-bottom: 5px; /* Add some space below the label */
+}
+
+/* Style for the price before discount */
+.client-product-PNS {
+    font-size: 1em; /* Set the font size */
+    color: #999; /* Set a grey color */
+    text-decoration: line-through; /* Add a strikethrough */
+    text-align: center; /* Center the text */
+    margin-bottom: 5px; /* Add some space below the price */
+}
+
+/* Style for the price after discount */
+.client-product-PS {
+    font-size: 1.2em; /* Increase font size */
+    color: #b12704; /* Set a red color */
+    font-weight: bold; /* Make it bold */
+    text-align: center; /* Center the text */
+}
+
+/* Additional styles for the div containing the prices */
+.client-product-price-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }

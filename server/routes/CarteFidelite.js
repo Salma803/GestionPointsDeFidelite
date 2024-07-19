@@ -2,6 +2,15 @@ const express = require('express');
 const router = express.Router();
 const { CarteFidelite,Client, Achat, ChequeCadeau } = require('../models');
 const { Op } = require('sequelize');
+const cron = require('node-cron');
+const { v4: uuidv4 } = require('uuid');
+
+
+function generateUniqueCode() {
+    return uuidv4().replace(/-/g, '').slice(0, 16); // Generate a 16-character code
+}
+
+
 
 // Route to update loyalty points and rest
 router.post('/:clientId', async (req, res) => {
@@ -68,7 +77,11 @@ router.get('/touver/:clientId', async (req, res) => {
     try {
         // Fetch CarteFidelite entry for the specified client
         const carteFidelite = await CarteFidelite.findOne({
-            where: { id_client: clientId }
+            where: { id_client: clientId },
+            include: [{
+                model: Client,
+                attributes: ['id', 'nom', 'prenom'] // Correctly separate attributes and use correct casing
+            }]
         });
 
         if (!carteFidelite) {
@@ -80,8 +93,8 @@ router.get('/touver/:clientId', async (req, res) => {
         console.error('Error fetching loyalty card:', error);
         res.status(500).json({ error: 'Failed to fetch loyalty card' });
     }
-
 });
+
 
 
 router.get('/', async (req, res) => {

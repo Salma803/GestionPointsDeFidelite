@@ -1,7 +1,7 @@
 {
   "development": {
     "username": "root",
-    "password": "MeryemSalmaPFA2024/*$",
+    "password": "mot@de@passe",
     "database": "stageDB",
     "host": "localhost",
     "dialect": "mysql"

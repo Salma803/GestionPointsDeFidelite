@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { Detail,Achat,Produit } = require('../models');
+const { Detail,Achat,Produit,Client,sequelize } = require('../models');
+const Sequelize = require('sequelize')
 
 
 router.get('/:idClient', async (req, res) => {
@@ -11,9 +12,6 @@ router.get('/:idClient', async (req, res) => {
             where: { id_client: clientId }
         });
 
-        if (achats.length === 0) {
-            return res.status(200).json('Vous n\'avez pas encore effecté d\'achat');
-        }
 
         const mappedAchats = achats.map(achat => ({
             id: achat.id,
@@ -70,6 +68,57 @@ router.get('/detail/:idAchat', async (req, res) => {
 });
 
 
+router.get('/compter/total', async (req, res) => {
+    try {
+        const totalAchats = await Achat.sum('total');
+        const totalAchats1 = Math.floor(totalAchats);
+        res.json({ total: totalAchats1 });
+    } catch (error) {
+        console.error('Error calculating total of achats:', error);
+        res.status(500).json({ error: 'Failed to calculate total of achats' });
+    }
+});
+
+
+
+
+router.get('/stat/produit', async (req, res) => {
+    try {
+        // Récupérer tous les produits avec leurs noms
+        const produits = await Produit.findAll({
+            attributes: ['id', 'nom']
+        });
+
+        // Exécuter une requête brute pour compter les occurrences de chaque produit dans la table details
+        const [details] = await sequelize.query(`
+            SELECT id_produit, COUNT(*) as nb_achats
+            FROM details
+            GROUP BY id_produit
+        `);
+
+        // Convertir les détails en un objet pour un accès rapide
+        const detailCounts = {};
+        details.forEach(detail => {
+            detailCounts[detail.id_produit] = detail.nb_achats;
+        });
+
+        // Créer le résultat final en associant les noms des produits et leurs comptes
+        const result = produits.map(produit => ({
+            id_produit: produit.id_produit,
+            nom: produit.nom,
+            nb_achats: detailCounts[produit.id] || 0
+        }));
+
+        res.json(result);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Erreur du serveur');
+    }
+});
+
+
 
 
 module.exports = router;
+
+

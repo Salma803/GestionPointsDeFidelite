@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Container, Row, Col, Card, Button, Alert } from 'react-bootstrap';
-import '../css/Panier.css'
+import '../css/Panier.css';
+import UseAuthClient from '../hooks/UseAuthClient';
+import SideNav from '../Components/SideNav';
+import Header from '../Components/Header';
+import NavBar from '../Components/NavBar';
+import Footer from '../Components/Footer';
+import { PlusCircle,MinusCircle,Trash,XCircle,ShoppingBag } from 'phosphor-react';
 
 function Panier() {
+    const isAuthenticated = UseAuthClient();
     const [products, setProducts] = useState([]);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [total, setTotal] = useState(0);
@@ -154,41 +161,61 @@ function Panier() {
         }
     };
 
-    return (
-        <Container className="cart-container mt-5">
-            <h2 className="cart-header">Panier</h2>
-            {products.length > 0 ? (
-                <div className="cart-items">
-                    <Row>
-                        {products.map((item) => (
-                            <Col md={4} key={item.id} className="mb-4">
-                                <Card>
-                                    <Card.Body>
-                                        <Card.Title>{item.Produit.nom}</Card.Title>
-                                        <Card.Text>Prix unitaire: {item.Produit.prixApresSolde} DH</Card.Text>
-                                        <Card.Text>Quantité: {item.quantité}</Card.Text>
-                                        <Card.Text>Total: {item.quantité * item.Produit.prixApresSolde} DH</Card.Text>
-                                        <div className="d-flex justify-content-between">
-                                            <Button className='add-button' variant="primary" onClick={() => handleAddQuantity(item.id)}>+</Button>
-                                            <Button className='subtract-button' variant="primary" onClick={() => handleSubtractQuantity(item.id)}>-</Button>
-                                            <Button  className='delete-button' variant="danger" onClick={() => handleDeleteItem(item.id)}>Supprimer</Button>
-                                        </div>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        ))}
-                    </Row>
-                    <Alert variant="info" className="mt-3">Total du panier: {total} DH</Alert>
-                    <div className="d-flex justify-content-between mt-3">
-                        <Button className='clear-cart-button' variant="danger" onClick={handleClearCart}>Supprimer le panier</Button>
-                        <Button className='purchase-cart-button' variant="success" onClick={handlePurchaseCart}>Acheter</Button>
+return (
+    <div>
+        <Header />
+        <SideNav/>
+        <div className='client-panier-body'>
+            <Container className="client-panier-container">
+                <h2 className="client-panier-header">Panier</h2>
+                {products.length > 0 ? (
+                    <div className="client-panier-elements">
+                         <div className='client-cf-screen__content'>
+
+                        <div className="client-cf-screen__background">
+                                <span className="client-cf-screen__background__shape client-cf-screen__background__shape4"></span>
+                                <span className="client-cf-screen__background__shape client-products-screen__background__shape6"></span>
+                                <span className="client-cf-screen__background__shape client-cf-screen__background__shape5"></span>
+                                <span className="client-cf-screen__background__shape client-cf-screen__background__shape3"></span>
+                                <span className="client-cf-screen__background__shape client-cf-screen__background__shape2"></span>
+                                <span className="client-cf-screen__background__shape client-cf-screen__background__shape1"></span>
+                            </div>
+                        <Row className='client-panier-row'>
+                            {products.map((item) => (
+                                <Col md={4} key={item.id} >
+                                    <Card className='client-panier-element'>
+                                        <Card.Body className='client-panier-element-body'>
+                                            <Card.Title className='client-panier-element-titre'>{item.Produit.nom}</Card.Title>
+                                            <Card.Text className='client-panier-element-PU'>Prix unitaire: {item.Produit.prixApresSolde} DH</Card.Text>
+                                            <Card.Text className='client-panier-element-Qte'>Quantité: {item.quantité}</Card.Text>
+                                            <Card.Text className='client-panier-element-Total'>Total: {item.quantité * item.Produit.prixApresSolde} DH</Card.Text>
+                                            <div className="d-flex justify-content-between">
+                                                <PlusCircle className='client-panier-add-button'  size={30} onClick={() => handleAddQuantity(item.id)} />
+                                                <MinusCircle className='client-panier-subtract-button'  size={30}  onClick={() => handleSubtractQuantity(item.id)} />
+                                                <Trash className='client-panier-delete-button'  size={30}  onClick={() => handleDeleteItem(item.id)} />
+                                            </div>
+                                        </Card.Body>
+                                    </Card>
+                                </Col>
+                            ))}
+                        </Row>
+                        <Alert variant="info" className="mt-3">Total du panier: {total} DH</Alert>
+                        </div>
+                        <div className="d-flex justify-content-between mt-3">
+                        
+                        <XCircle className='client-panier-clear-button' size={40} onClick={handleClearCart}/>
+                        <ShoppingBag className='client-panier-purchase-button'  size={40} onClick={handlePurchaseCart}/>
                     </div>
-                </div>
-            ) : (
-                <Alert variant="warning">Votre panier est vide.</Alert>
-            )}
-        </Container>
-    );
+                    </div>
+                ) : (
+                    <Alert variant="warning">Votre panier est vide.</Alert>
+                )}
+            </Container>
+        </div>
+        <Footer />
+    </div>
+);
+
 }
 
 export default Panier;

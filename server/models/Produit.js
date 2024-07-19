@@ -37,7 +37,6 @@ module.exports = (sequelize, DataTypes) => {
             onDelete: 'CASCADE'
         });
         Produit.hasMany(models.PromotionProduit, { foreignKey: 'id_produit' });
-        Produit.hasMany(models.PromotionRayon, { foreignKey: 'id_rayon' });
     };
 
     

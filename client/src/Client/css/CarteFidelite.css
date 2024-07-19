@@ -1,51 +1,205 @@
-.carte-et-cheque-cadeau {
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+.client-cf-body{
+  background: linear-gradient(90deg, #0f448c, #bce315);		
+	box-shadow: 0px 0px 24px #0f448c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.client-cf-et-cc{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 80%;
+  align-items: center;
+  padding-top: 50px;
+  padding-bottom: 50px;
+}
+
+.client-cf {
   display: grid;
-  grid-template-rows: auto 1fr;
-  justify-content: space-between;
-  padding: 50px;
+  grid-template-columns: auto auto; /* Ensures both columns take equal space */
+  align-items:center;
+  justify-content: space-around;
+  position: relative;
+  width: 80%; /* Full width of the container */
 }
-.cheque-card{
- display: grid;
- grid-template-rows: auto auto auto ; 
-}
-.Carte-Fidelite {
-  height: fit-content;
-  position: center !important;
-  width: 500px !important;
-  background-image: url(../../../public/card-bg.avif);
-  background-size: cover; 
-  background-position: center;
-margin-left: 400px;
+.client-cf-front{
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+  z-index: 1;
+  margin-left: 200px;
+  background: linear-gradient(90deg, #0f448c, #bce315);		
+	position: relative;	
+	box-shadow: 0px 0px 24px #0f448c;
+  display: flex;
+  flex-direction: column;
+  width:300px;
+  height: 180px;
+  justify-content: center;
+  align-items: center;
   padding: 20px;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-bottom: 20px; /* Add margin bottom for spacing between sections */
+  transition: transform 0.5s ease;
+  cursor: pointer; 
 }
 
-.cheques-cadeaux {
-  width: 100%;
+.client-cf-back{
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+  z-index: 0;
+  margin-left: 100%;
+  background: linear-gradient(90deg, #0f448c, #bce315);	
+	position: relative;	
+	box-shadow: 0px 0px 24px #0f448c;
+  display: flex;
+  flex-direction: column;
+  width:300px;
+  height: 180px;
+  justify-content: space-around;
+  align-items: center;
   padding: 20px;
-  background-color: #f0f0f0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  margin-bottom: 20px; /* Add margin bottom for spacing between sections */
+  transform: translateX(-90%); /* Initially hidden (off-screen) */
+  transition: transform 0.5s ease;
+}
+.client-cf-front:hover ~ .client-cf-back {
+  transform: translateX(0); /* Slide in on hover or when .show is added */
+}
+.client-cf-back.show {
+  transform: translateX(0);
 }
 
-.cheques-cadeaux-header {
-  font-size: 1.5rem;
-  margin-bottom: 15px;
+.client-cc{
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 30px;
+  margin-bottom: 20px;
+  width: 80%;
+  
+}
+.client-actions-cc{
+  display: flex;
+  justify-content:center;
+  align-items: center;
+  gap: 20px;
+
+
+}
+.client-titre-cc{
+  font-family: 'Roboto',sans-serif;
+  background: rgba(255,255,255,0.5);
+-webkit-backdrop-filter: blur(10px);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255,255,255,0.25);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px;
+  margin: 10px;
+  width:auto;
+  font-size: 20px;
+}
+.client-titre-cf{
+  font-family: 'Roboto',sans-serif;
+  background: rgba(255,255,255,0.5);
+-webkit-backdrop-filter: blur(10px);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255,255,255,0.25);
+display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 10px;
+  margin: 10px;
+  width:fit-content;
+  font-size: 20px;
+}
+.client-point-cf,.client-reste-cf{
+  font-family: 'Roboto',sans-serif;
+  font-weight: bold;
+  background: rgba(255,255,255,0.5);
+-webkit-backdrop-filter: blur(10px);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255,255,255,0.25);
+}
+.btn-outline-secondary{
+  background-color: #bce315 !important;
 }
 
-.no-cheques-message {
-  margin-top: 10px;
+
+.client-cf-screen__content {
+	z-index: 2;
+  display: flex;
+  flex-direction: column;
+	position: relative;
+  justify-content: center;	
+  align-items: center;
+	height: 100%;
+  overflow: hidden;
+}
+
+.client-cf-screen__background {		
+	position: absolute;
+	top: 0 !important;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	-webkit-clip-path: inset(0 0 0 0);
+	clip-path: inset(0 0 0 0) !important;	
+}
+
+.client-cf-screen__background__shape {
+	transform: rotate(45deg);
+	position: absolute;
 }
 
 
 
-  .Carte-Fidelite,
-  .cheques-cadeaux {
-    width: 100%;
-    margin-bottom: 20px;
-  }
+.client-cf-screen__background__shape1 {
+  z-index: 0;
+	height: 520px;
+	width: 520px;
+  margin-right: 400px;
+	background: #ffffff;	
+	top: -50px;
+	right: 120px;	
+	border-radius: 0 0 0 0;
+}
+
+.client-cf-screen__background__shape2 {
+  z-index: 0;
+	height: 220px;
+	width: 220px;
+	background: linear-gradient(270deg, #bce315, #0f448c);
+	top: -172px;
+	right: 0;	
+	border-radius: 32px;
+}
+
+.client-cf-screen__background__shape3 {
+  z-index: 0;
+	height: 540px;
+	width: 190px;
+	background: linear-gradient(270deg, #bce315, #0f448c);
+	top: -24px;
+	right: 0;	
+	border-radius: 32px;
+}
+
+.client-cf-screen__background__shape4 {
+  z-index: 0;
+	height: 400px;
+	width: 200px;
+	background: #bce315;	
+	top: 420px;
+	right: 50px;	
+	border-radius: 60px;
+}
 

@@ -13,6 +13,10 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: DataTypes.NOW,
         }
     });
+    Rayon.associate = (models) => {
+        Rayon.hasMany(models.PromotionRayon, { foreignKey: 'id_rayon' });
+
+    };
 
     return Rayon;
 };

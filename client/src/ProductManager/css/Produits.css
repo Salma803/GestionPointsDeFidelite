@@ -1,0 +1,12 @@
+.admin-produits-container{
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+div.table-responsive{
+    margin: 20px;
+    width: 80%;
+    padding: 10px;
+}

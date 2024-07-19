@@ -1,75 +1,106 @@
-/* Styles for Achat component */
-.container {
-    padding: 20px;
-    width: 100%;
+.client-achats-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+    align-items: center;
+    margin: 50px;
+    width: 80%;
+    height: 80%;
+    min-height: 800px;
 }
 
-h2 {
-    font-size: 28px;
-    font-weight: bold;
+.client-achats-body {
+    background: linear-gradient(270deg, #bce315, white);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+}
+
+.client-outils-achat {
+    background-color: rgb(255, 197, 8);
+    width: 20%;
+    margin-left: 50px;
+    padding: 5px;
+    box-shadow: 0px 0px 24px #000000;
+}
+
+.outils-achats {
+    padding: 10px;
+    top: 0 !important;
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+}
+
+.client-achats {
+    display: grid;
+    grid-template-rows: repeat(2, 1fr) !important;
+    gap: 20px;
+    box-shadow: 0px 0px 24px #000000;
+    padding: 20px;
+    width: 95%;
+    margin-top: 20px;
     margin-bottom: 20px;
 }
 
-.card {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    transition: box-shadow 0.3s ease;
+.client-achat-card {
+    color: rgb(7, 14, 14);
+    margin-bottom: 20px;
+    transition: transform 0.2s, width 0.2s;
+    width: 500px !important;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.card:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+.client-achat-card:hover {
+    transform: scale(1.02); /* Scale up slightly */
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5); /* Add a stronger shadow for depth */
 }
 
-.card-body {
-    padding: 20px;
+
+
+.client-achat-header-produit,
+.client-achat-header-ean1,
+.client-achat-header-prix,
+.client-achat-header-qte,
+.client-achat-header-point,
+.client-achat-header-total {
+    font-size: 12px;
+    background-color: chartreuse !important;
+    text-align: center;
+    padding: 5px;
 }
 
-.card-title {
-    font-size: 20px;
-    font-weight: bold;
-    margin-bottom: 10px;
+.client-achat-td-produit,
+.client-achat-td-ean1,
+.client-achat-td-prix,
+.client-achat-td-qte,
+.client-achat-td-point,
+.client-achat-td-total {
+    font-size: 12px;
+    text-align: center;
+    padding: 5px;
 }
 
-.card-text {
-    font-size: 16px;
-    margin-bottom: 10px;
+.client-achat-details-bttn {
+    background-color: rgb(255, 197, 8) !important;
+    border-color: rgb(255, 197, 8) !important;
 }
 
-.details-bttn {
-    background-color: #3c43af !important;
-    color: #fff;
-    border: none;
-    padding: 10px 20px;
-    font-size: 1rem;
-    cursor: pointer;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+.aucun-achat {
+    background-color: rgb(255, 197, 8);
+    box-shadow: 0px 0px 24px #000000;
+    margin-top: 100px;
+    height: 200px;
+    padding: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.details-bttn:hover {
-    background-color: #2c3276 !important; 
-}
 
-.details-container {
-    background-color: #f9f9f9;
-    padding: 10px;
-    margin-top: 10px;
-    border-radius: 8px;
-    overflow-x: auto;
-}
 
-.detail-item {
-    margin-bottom: 5px;
-}
-
-.table {
-    width: 100%;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-}
-
-@media (max-width: 768px) {
-    .card {
-        margin-bottom: 20px;
-    }
-}

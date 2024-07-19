@@ -20,6 +20,8 @@ const chequeCadeauRoutes = require("./routes/ChequeCadeau");
 const detailRoutes = require("./routes/Achat_Detail");
 const authRoutes = require("./routes/Auth");
 const regleRoutes = require("./routes/Regle");
+const reclamationRoutes = require("./routes/Reclamation");
+
 
 
 app.use("/client", clientRoutes);
@@ -33,6 +35,8 @@ app.use('/chequecadeau',chequeCadeauRoutes)
 app.use("/achat",detailRoutes);
 app.use("/checkauth",authRoutes);
 app.use('/regle',regleRoutes);
+app.use('/reclamation',reclamationRoutes);
+
 
 
 db.sequelize.sync().then(() => {

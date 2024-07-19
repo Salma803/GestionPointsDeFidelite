@@ -3,26 +3,28 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const router = express.Router();
 const { Produit,Rayon,PromotionProduit,PromotionRayon } = require('../models'); 
-const { where,Op } = require('sequelize');
+const {Op } = require('sequelize');
+const moment =require('moment');
 
 //Methode pour l'admin
 
 router.post('/creerproduits', async (req, res) => {
-    const { nom, description, ean1, ean2, prix, id_rayon, valeur_promotion, date_debut,date_fin } = req.body;
-    const promotionValue = valeur_promotion !== undefined ? valeur_promotion : 0;
+    const { nom, description, ean1, ean2, prix, id_rayon, valeur_promotion, date_debut, date_fin } = req.body;
+    const promotionValue = valeur_promotion !== undefined && valeur_promotion !== '' ? valeur_promotion : 0;
     const startDate = date_debut ? new Date(date_debut) : new Date();
     let finishDate;
         
-        if (date_fin) {
-            finishDate = new Date(date_fin);
-        } else {
-            finishDate = new Date(startDate);
-            finishDate.setMonth(finishDate.getMonth() + 1);
-        }
+    if (date_fin) {
+        finishDate = new Date(date_fin);
+    } else {
+        finishDate = new Date(startDate);
+        finishDate.setMonth(finishDate.getMonth() + 1);
+    }
 
-        if (finishDate <= startDate) {
-            return res.status(400).json({ error: 'La date de fin doit être supérieure à la date de début' });
-        }
+    if (finishDate <= startDate) {
+        return res.status(400).json({ error: 'La date de fin doit être supérieure à la date de début' });
+    }
+
     try {
         // Validate input
         if (!nom || !ean1 || !prix || !id_rayon) {
@@ -35,9 +37,12 @@ router.post('/creerproduits', async (req, res) => {
             return res.status(400).json({ error: 'L\'ean1 doit être unique' });
         }
 
+        // Set ean2 to null if it is an empty string
+        const ean2Value = ean2 !== '' ? ean2 : null;
+
         // Check if ean2 is unique if provided
-        if (ean2) {
-            const existingProduitWithEan2 = await Produit.findOne({ where: { ean2 } });
+        if (ean2Value) {
+            const existingProduitWithEan2 = await Produit.findOne({ where: { ean2: ean2Value } });
             if (existingProduitWithEan2) {
                 return res.status(400).json({ error: 'L\'ean2 doit être unique' });
             }
@@ -45,7 +50,7 @@ router.post('/creerproduits', async (req, res) => {
 
         // Create the new product
         const newProduit = await Produit.create({
-            nom, description, ean1, ean2, prix, id_rayon
+            nom, description, ean1, ean2: ean2Value, prix, id_rayon
         });
 
         // Create promotion produit with default or provided value
@@ -69,77 +74,180 @@ router.post('/creerproduits', async (req, res) => {
 
 
 
+
 //Methode pour le clients
 //voir tous les produits avec leur prix avant promotion, la valeur de promotion et le prix apres solde avec condition de date 
 
+
+// router.get('/produits', async (req, res) => {
+//     try {
+//         // Fetch all products with the associated rayon name
+//         const listeProduits = await Produit.findAll({
+//             include: [
+//                 {
+//                     model: Rayon,
+//                     attributes: ['nom']
+//                 }
+//             ]
+//         });
+
+//         // Calculate discounted prices for each product
+//         const produitsAvecPrixSoldes = await Promise.all(listeProduits.map(async (produit) => {
+//             // Check if the product is on sale
+//             const promotionProduit = await PromotionProduit.findOne({
+//                 where: {
+//                     id_produit: produit.id,
+//                     valeur: {
+//                         [Op.ne]: 0
+//                     },
+//                     date_debut: {
+//                         [Op.lte]: new Date()
+//                     },
+//                     date_fin: {
+//                         [Op.gte]: new Date()
+//                     }
+//                 }
+//             });
+
+//             const promotionRayon = await PromotionRayon.findOne({
+//                 where: {
+//                     id_rayon: produit.id_rayon,
+//                     valeur: {
+//                         [Op.ne]: 0
+//                     },
+//                     date_debut: {
+//                         [Op.lte]: new Date()
+//                     },
+//                     date_fin: {
+//                         [Op.gte]: new Date()
+//                     }
+//                 }
+//             });
+
+//             let estSolde = false;
+//             let valeurSolde = 0;
+//             let active = false;
+//             let dateDebutPromo = null;
+//             let dateFinPromo = null;
+//             let dateDebutPromoProduit = null;
+//             let dateFinPromoProduit = null;
+//             let dateDebutPromoRayon = null;
+//             let dateFinPromoRayon = null;
+//             let valeurPromotionProduit = 0;
+//             let valeurPromotionRayon = 0;
+
+//             if (promotionProduit || promotionRayon) {
+//                 estSolde = true;
+//                 active = true; // Promotion is active
+//                 if (promotionProduit && promotionRayon) {
+//                     if (promotionProduit.valeur >= promotionRayon.valeur) {
+//                         valeurSolde = promotionProduit.valeur;
+//                         dateDebutPromo = promotionProduit.date_debut;
+//                         dateFinPromo = promotionProduit.date_fin;
+//                     } else {
+//                         valeurSolde = promotionRayon.valeur;
+//                         dateDebutPromo = promotionRayon.date_debut;
+//                         dateFinPromo = promotionRayon.date_fin;
+//                     }
+//                 } else if (promotionProduit) {
+//                     valeurSolde = promotionProduit.valeur;
+//                     dateDebutPromo = promotionProduit.date_debut;
+//                     dateFinPromo = promotionProduit.date_fin;
+//                 } else {
+//                     valeurSolde = promotionRayon.valeur;
+//                     dateDebutPromo = promotionRayon.date_debut;
+//                     dateFinPromo = promotionRayon.date_fin;
+//                 }
+//             }
+
+
+//             let prixApresSolde = produit.prix;
+//             if (estSolde) {
+//                 prixApresSolde = produit.prix - (produit.prix * (valeurSolde / 100));
+//             }
+
+//             // Add discount information to the product
+//             produit.dataValues.prixAvantSolde = produit.prix;
+//             produit.dataValues.prixApresSolde = prixApresSolde;
+//             produit.dataValues.valeurSolde = valeurSolde;
+//             produit.dataValues.active = active;
+//             produit.dataValues.dateDebutPromo = dateDebutPromo;
+//             produit.dataValues.dateFinPromo = dateFinPromo;
+//             produit.dataValues.nomRayon = produit.Rayon.nom;
+//             return produit;
+//         }));
+
+        
+
+//         res.json(produitsAvecPrixSoldes);
+//     } catch (error) {
+//         console.error('Error fetching products:', error);
+//         res.status(500).json('Failed to fetch products');
+//     }
+// });
 router.get('/produits', async (req, res) => {
     try {
-        // Récupérer tous les produits
-        const listeProduits = await Produit.findAll();
+        const listeProduits = await Produit.findAll({
+            include: [
+                {
+                    model: Rayon,
+                    attributes: ['nom']
+                }
+            ]
+        });
 
-        // Calculer les prix soldés pour chaque produit
         const produitsAvecPrixSoldes = await Promise.all(listeProduits.map(async (produit) => {
-            // Vérifier si le produit est soldé
             const promotionProduit = await PromotionProduit.findOne({
                 where: {
                     id_produit: produit.id,
-                    valeur: {
-                        [Op.ne]: 0
-                    },
-                    date_debut: {
-                        [Op.lte]: new Date()
-                    },
-                    date_fin: {
-                        [Op.gte]: new Date()
-                    }
+                    valeur: { [Op.ne]: 0 },
+                    date_debut: { [Op.lte]: new Date() },
+                    date_fin: { [Op.gte]: new Date() }
                 }
             });
 
             const promotionRayon = await PromotionRayon.findOne({
                 where: {
                     id_rayon: produit.id_rayon,
-                    valeur: {
-                        [Op.ne]: 0
-                    },
-                    date_debut: {
-                        [Op.lte]: new Date()
-                    },
-                    date_fin: {
-                        [Op.gte]: new Date()
-                    }
+                    valeur: { [Op.ne]: 0 },
+                    date_debut: { [Op.lte]: new Date() },
+                    date_fin: { [Op.gte]: new Date() }
                 }
             });
 
-            let estSolde = false;
             let valeurSolde = 0;
             let active = false;
             let dateDebutPromo = null;
             let dateFinPromo = null;
 
             if (promotionProduit || promotionRayon) {
-                estSolde = true;
-                active = true; // Promotion is active
-                if (promotionRayon && promotionProduit) {
-                    valeurSolde = Math.max(promotionRayon.valeur, promotionProduit.valeur);
-                    dateDebutPromo = promotionRayon.date_debut;
-                    dateFinPromo = promotionRayon.date_fin;
-                } else if (promotionRayon) {
-                    valeurSolde = promotionRayon.valeur;
-                    dateDebutPromo = promotionRayon.date_debut;
-                    dateFinPromo = promotionRayon.date_fin;
+                active = true;
+                if (promotionProduit && promotionRayon) {
+                    if (promotionProduit.valeur >= promotionRayon.valeur) {
+                        valeurSolde = promotionProduit.valeur;
+                        dateDebutPromo = promotionProduit.date_debut;
+                        dateFinPromo = promotionProduit.date_fin;
+                    } else {
+                        valeurSolde = promotionRayon.valeur;
+                        dateDebutPromo = promotionRayon.date_debut;
+                        dateFinPromo = promotionRayon.date_fin;
+                    }
                 } else if (promotionProduit) {
                     valeurSolde = promotionProduit.valeur;
                     dateDebutPromo = promotionProduit.date_debut;
                     dateFinPromo = promotionProduit.date_fin;
+                } else {
+                    valeurSolde = promotionRayon.valeur;
+                    dateDebutPromo = promotionRayon.date_debut;
+                    dateFinPromo = promotionRayon.date_fin;
                 }
             }
 
             let prixApresSolde = produit.prix;
-            if (estSolde) {
+            if (valeurSolde > 0) {
                 prixApresSolde = produit.prix - (produit.prix * (valeurSolde / 100));
             }
 
-            // Ajouter les informations sur le solde au produit
             produit.dataValues.prixAvantSolde = produit.prix;
             produit.dataValues.prixApresSolde = prixApresSolde;
             produit.dataValues.valeurSolde = valeurSolde;
@@ -156,6 +264,82 @@ router.get('/produits', async (req, res) => {
         res.status(500).json('Failed to fetch products');
     }
 });
+
+
+router.get('/produitpromotion', async (req, res) => {
+    try {
+        // Fetch all products with the associated rayon name
+        const listeProduits = await Produit.findAll({
+            include: [
+                {
+                    model: Rayon,
+                    attributes: ['nom']
+                }
+            ]
+        });
+
+        // Calculate discounted prices for each product
+        const produitsAvecPrixSoldes = await Promise.all(listeProduits.map(async (produit) => {
+            // Check if the product is on sale
+            const promotionProduit = await PromotionProduit.findOne({
+                where: {
+                    id_produit: produit.id,
+                    valeur: {
+                        [Op.ne]: 0
+                    },
+                    date_debut: {
+                        [Op.lte]: new Date() // Promotion start date is less than or equal to today
+                    },
+                    date_fin: {
+                        [Op.gte]: new Date() // Promotion end date is greater than or equal to today
+                    }
+                }
+            });
+
+            let estSolde = false;
+            let valeur_promotion = 0;
+            let active = false;
+            let date_debut = new Date();
+            let date_fin = new Date();
+            date_fin.setDate(date_fin.getDate() + 1); // End date is one day later
+
+            let valeurPromotionProduit = 0;
+
+            if (promotionProduit) {
+                estSolde = true;
+                active = true; // Promotion is active
+                valeur_promotion = promotionProduit.valeur;
+                date_debut = promotionProduit.date_debut;
+                date_fin = promotionProduit.date_fin;
+                valeurPromotionProduit = promotionProduit.valeur;
+            }
+
+            let prixApresSolde = produit.prix;
+            if (estSolde) {
+                prixApresSolde = produit.prix - (produit.prix * (valeur_promotion / 100));
+            }
+
+            // Add discount information to the product
+            produit.dataValues.prixAvantSolde = produit.prix;
+            produit.dataValues.prixApresSolde = prixApresSolde;
+            produit.dataValues.valeur_promotion = valeur_promotion;
+            produit.dataValues.active = active;
+            produit.dataValues.date_debut = date_debut;
+            produit.dataValues.date_fin = date_fin;
+            produit.dataValues.nomRayon = produit.Rayon.nom;
+            produit.dataValues.valeurPromotionProduit = valeurPromotionProduit;
+
+            return produit;
+        }));
+
+        res.json(produitsAvecPrixSoldes);
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        res.status(500).json('Failed to fetch products');
+    }
+});
+
+
 
 // Voir un produit spécifique par ID avec les promotions associées, y compris la vérification de la promotion du rayon et de la promotion produit*
 
@@ -318,4 +502,82 @@ router.get('/rayon/:rayon', async (req, res) => {
         res.status(500).json({ error: 'Erreur lors de la récupération des produits par rayon' });
     }
 });
+router.delete('/:id',async (req, res) => {
+    const productId = req.params.id;
+
+    try {
+        
+        const product = await Produit.findOne({ where: { id: productId } });
+
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        await product.destroy();
+
+        // Send success message
+        res.json({ message: 'Product deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting product:', error);
+        res.status(500).json({ error: 'Failed to delete product' });
+    }
+});
+router.put('/:id', async (req, res) => {
+    const productId = req.params.id;
+    const { nom, description, ean1,ean2, prix, id_rayon } = req.body;
+
+    try {
+        // Find product by ID
+        let product = await Produit.findOne({ where: { id: productId } });
+
+        // Check if product exists
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        // Check if the new ean1 is unique
+        if (ean1) {
+            const existingProduct1 = await Produit.findOne({ where: { ean1, id: { [Op.ne]: productId } } });
+            if (existingProduct1) {
+                return res.status(401).json({ error: 'ean1 must be unique' });
+            }
+        }
+        if (ean2) {
+            const existingProduct2 = await Produit.findOne({ where: { ean2, id: { [Op.ne]: productId } } });
+            if (existingProduct2) {
+                return res.status(402).json({ error: 'ean2 must be unique' });
+            }
+        }
+
+        // Update product fields
+        product.nom = nom || product.nom;
+        product.description = description || product.description;
+        product.ean1 = ean1 || product.ean1;
+        product.ean2 = ean2 || product.ean2;
+        product.prix = prix || product.prix;
+        product.id_rayon = id_rayon || product.id_rayon;
+
+        // Save the updated product
+        await product.save();
+
+        // Return updated product as JSON response
+        res.json(product);
+
+    } catch (error) {
+        console.error('Error updating product:', error);
+        res.status(500).json({ error: 'Failed to update product' });
+    }
+});
+router.get('/compter/count', async (req, res) => {
+    try {
+        const count = await Produit.count();
+        res.json({ count });
+    } catch (error) {
+        console.error('Error counting products:', error);
+        res.status(500).json({ error: 'Failed to count products' });
+    }
+});
+
+
+
 module.exports = router;
