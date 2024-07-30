@@ -29,46 +29,88 @@ import ClientInfo from "./Client/pages/ClientInfo";
 import ProductManagerInfo from "./ProductManager/pages/ProductManagerInfo";
 import ProductStats from "./ProductManager/utils/ProductStats";
 
+import config from "./config/config.json";
 
 function App() {
-  return (
-    <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/client/login" element={<LoginClient />} />
-          <Route path="/client/magasin" element={<ClientHome />} />
-          <Route path="/client/produit/:id" element={<ProductDetails />} />
-          <Route path="/user" element={<UserProfile />} />
-          <Route path="/panier" element={<Panier />} />
-          <Route path="/cartefidelite" element={<CarteFidelite />} />
-          <Route path="/achat" element={<Achat />} />
-          <Route path="/admin/login" element={<LoginAdmin />} />
-          <Route path="/loyaltymanager/creerclient" element={<CreerClient />} />
-          <Route path="/loyaltymanager/home" element={<Page />} />
-          <Route path="/loyaltymanager/listeclients" element={<ListeClients />} />
-          <Route path="/loyaltymanager/cartefidelite" element={<ListeCarteFidelite />} />
-          <Route path="/loyaltymanager/chequecadeau" element={<ListesChequesCadeau />} />
-          <Route path='/auth' element={<UseAuth/>} />
-          <Route path='/loyaltymanager/info' element={<AdminInfo/>} />
-          <Route path='/admin/graph' element={<Home2/>}/>
-          <Route path='/loyaltymanager/reclamations' element={<ReclamationsAdmin/>}/>
-          <Route path='/client/reclamations' element={<Reclamations/>}/>
-          <Route path='/productmanager/home' element={<Page2/>}/>
-          <Route path='/productmanager/creerproduit' element={<CreerProduit/>}/>
-          <Route path='/productmanager/creerrayon' element={<CreerRayon/>}/>
-          <Route path='/productmanager/produits' element={<Produits/>}/>
-          <Route path='/productmanager/rayons' element={<Rayons/>}/>
-          <Route path='/productmanager/promotions' element={<PromotionsProduits/>}/>
-          <Route path='/productmanager/promotions1' element={<PromotionsRayons/>}/>
-          <Route path='/productmanager/regles' element={<Regles/>}/>
-          <Route path='/client/info' element={<ClientInfo/>}/>
-          <Route path='/count' element={<ProductStats/>}/>
-          <Route path='/productmanager/info' element={<ProductManagerInfo/>}/>
-
-        </Routes>
-      </div>
-    </Router>
-  );
+	return (
+		<Router basename={config?.server?.base}>
+			<div className="App">
+				<Routes>
+					<Route path="/client/login" element={<LoginClient />} />
+					<Route path="/client/magasin" element={<ClientHome />} />
+					<Route
+						path="/client/produit/:id"
+						element={<ProductDetails />}
+					/>
+					<Route path="/user" element={<UserProfile />} />
+					<Route path="/panier" element={<Panier />} />
+					<Route path="/cartefidelite" element={<CarteFidelite />} />
+					<Route path="/achat" element={<Achat />} />
+					<Route path="/admin/login" element={<LoginAdmin />} />
+					<Route
+						path="/loyaltymanager/creerclient"
+						element={<CreerClient />}
+					/>
+					<Route path="/loyaltymanager/home" element={<Page />} />
+					<Route
+						path="/loyaltymanager/listeclients"
+						element={<ListeClients />}
+					/>
+					<Route
+						path="/loyaltymanager/cartefidelite"
+						element={<ListeCarteFidelite />}
+					/>
+					<Route
+						path="/loyaltymanager/chequecadeau"
+						element={<ListesChequesCadeau />}
+					/>
+					<Route path="/auth" element={<UseAuth />} />
+					<Route
+						path="/loyaltymanager/info"
+						element={<AdminInfo />}
+					/>
+					<Route path="/admin/graph" element={<Home2 />} />
+					<Route
+						path="/loyaltymanager/reclamations"
+						element={<ReclamationsAdmin />}
+					/>
+					<Route
+						path="/client/reclamations"
+						element={<Reclamations />}
+					/>
+					<Route path="/productmanager/home" element={<Page2 />} />
+					<Route
+						path="/productmanager/creerproduit"
+						element={<CreerProduit />}
+					/>
+					<Route
+						path="/productmanager/creerrayon"
+						element={<CreerRayon />}
+					/>
+					<Route
+						path="/productmanager/produits"
+						element={<Produits />}
+					/>
+					<Route path="/productmanager/rayons" element={<Rayons />} />
+					<Route
+						path="/productmanager/promotions"
+						element={<PromotionsProduits />}
+					/>
+					<Route
+						path="/productmanager/promotions1"
+						element={<PromotionsRayons />}
+					/>
+					<Route path="/productmanager/regles" element={<Regles />} />
+					<Route path="/client/info" element={<ClientInfo />} />
+					<Route path="/count" element={<ProductStats />} />
+					<Route
+						path="/productmanager/info"
+						element={<ProductManagerInfo />}
+					/>
+				</Routes>
+			</div>
+		</Router>
+	);
 }
 
 export default App;
