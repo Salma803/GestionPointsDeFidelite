@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import LandingPage from './LangingPage/LandingPage';
 import LoginClient from "./Client/pages/LoginClient";
 import LoginAdmin from "./LoyaltyManager/pages/LoginAdmin";
 import CreerClient from "./LoyaltyManager/pages/CreerClient";
@@ -35,6 +36,7 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
+        <Route path="/" element={<LandingPage />} />
           <Route path="/client/login" element={<LoginClient />} />
           <Route path="/client/magasin" element={<ClientHome />} />
           <Route path="/client/produit/:id" element={<ProductDetails />} />
