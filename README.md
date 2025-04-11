@@ -1,5 +1,5 @@
 
-# 📌 Gestion des Points de Fidélité – Jolof System
+# 📌 Gestion des Points de Fidélité 
 
 Une application **full-stack** de gestion de points de fidélité développée pour un client de **Jolof System**, permettant de récompenser les clients d’un supermarché via des chèques-cadeaux générés automatiquement à partir de leurs transactions.
 
